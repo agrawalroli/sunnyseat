@@ -214,36 +214,7 @@ async function findSunnySide() {
     const airlineIata = flightNum.match(/^[A-Z]{2}/)?.[0] || flightNum.slice(0,2);
     const flightNumber = flightNum.slice(airlineIata.length);
 
-    // Try real-time/recent flights endpoint first
-    const url = `https://ancient-water-ef87.roliagrawal.workers.dev?endpoint=flights&params=flight_iata=${flightNum}%26flight_date=${flightDate}%26limit=1`;
-    const res = await fetch(url);
-    const data = await res.json();
-
-    let dep, arr, depUTC, dur;
-
-    if (data.data && data.data.length > 0) {
-      const f = data.data[0];
-      dep = f.departure?.iata?.toUpperCase();
-      arr = f.arrival?.iata?.toUpperCase();
-
-      // Get departure time UTC
-      const depSched = f.departure?.scheduled;
-      if (depSched) {
-        const d = new Date(depSched);
-        depUTC = d;
-      }
-
-      // Calculate duration from scheduled times
-      const arrSched = f.arrival?.scheduled;
-      if (depSched && arrSched) {
-        const depMs = new Date(depSched).getTime();
-        const arrMs = new Date(arrSched).getTime();
-        dur = (arrMs - depMs) / 3600000;
-      }
-    }
-
-    // Fallback: try routes endpoint (gives scheduled times without date)
-    if (!dep || !arr || !depUTC || !dur) {
+   
       const routeUrl = `https://ancient-water-ef87.roliagrawal.workers.dev?endpoint=routes&params=flight_iata=${flightNum}%26limit=1`;
       const routeRes = await fetch(routeUrl);
       const routeData = await routeRes.json();
@@ -268,7 +239,6 @@ async function findSunnySide() {
           if (dur < 0) dur += 24; // overnight flight
         }
       }
-    }
 
     if (!dep || !arr) {
       errEl.textContent = `Flight ${flightNum} not found. Check the number and try again.`;
