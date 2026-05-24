@@ -210,35 +210,32 @@ async function findSunnySide() {
   setLoading(true);
 
   try {
-    // Parse airline code and number
-    const airlineIata = flightNum.match(/^[A-Z]{2}/)?.[0] || flightNum.slice(0,2);
-    const flightNumber = flightNum.slice(airlineIata.length);
+    // Use routes endpoint (available on free plan)
+    const routeUrl = `https://ancient-water-ef87.roliagrawal.workers.dev?endpoint=routes&params=flight_iata=${flightNum}%26limit=1`;
+    const routeRes = await fetch(routeUrl);
+    const routeData = await routeRes.json();
 
-   
-      const routeUrl = `https://ancient-water-ef87.roliagrawal.workers.dev?endpoint=routes&params=flight_iata=${flightNum}%26limit=1`;
-      const routeRes = await fetch(routeUrl);
-      const routeData = await routeRes.json();
+    let dep, arr, depUTC, dur;
 
-      if (routeData.data && routeData.data.length > 0) {
-        const r = routeData.data[0];
-        dep = dep || r.departure?.iata?.toUpperCase();
-        arr = arr || r.arrival?.iata?.toUpperCase();
+    if (routeData.data && routeData.data.length > 0) {
+      const r = routeData.data[0];
+      dep = r.departure?.iata?.toUpperCase();
+      arr = r.arrival?.iata?.toUpperCase();
 
-        if (!depUTC && r.departure?.time) {
-          // Combine flight date with scheduled time from route
-          const [hr, mn] = r.departure.time.split(':').map(Number);
-          const [yr, mo, dy] = flightDate.split('-').map(Number);
-          const depTz = AIRPORTS[dep]?.tz || 0;
-          depUTC = new Date(Date.UTC(yr, mo-1, dy, hr - depTz, mn));
-        }
-
-        if (!dur && r.departure?.time && r.arrival?.time) {
-          const [dh, dm] = r.departure.time.split(':').map(Number);
-          const [ah, am] = r.arrival.time.split(':').map(Number);
-          dur = ((ah * 60 + am) - (dh * 60 + dm)) / 60;
-          if (dur < 0) dur += 24; // overnight flight
-        }
+      if (r.departure?.time) {
+        const [hr, mn] = r.departure.time.split(':').map(Number);
+        const [yr, mo, dy] = flightDate.split('-').map(Number);
+        const depTz = AIRPORTS[dep]?.tz || 0;
+        depUTC = new Date(Date.UTC(yr, mo-1, dy, hr - depTz, mn));
       }
+
+      if (r.departure?.time && r.arrival?.time) {
+        const [dh, dm] = r.departure.time.split(':').map(Number);
+        const [ah, am] = r.arrival.time.split(':').map(Number);
+        dur = ((ah * 60 + am) - (dh * 60 + dm)) / 60;
+        if (dur < 0) dur += 24; // overnight flight
+      }
+    }
 
     if (!dep || !arr) {
       errEl.textContent = `Flight ${flightNum} not found. Check the number and try again.`;
