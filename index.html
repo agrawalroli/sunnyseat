@@ -29,31 +29,21 @@
   }
   .field { display: flex; flex-direction: column; gap: 5px; }
   label { font-family: var(--mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
-  input[type="text"], input[type="date"], input[type="password"] {
+  input[type="text"], input[type="date"] {
     background: var(--bg); border: 1px solid var(--border); border-radius: 6px;
     padding: 10px 12px; font-family: var(--mono); font-size: 16px; font-weight: 500;
     color: var(--text); outline: none; transition: border-color 0.15s; width: 100%;
     -webkit-appearance: none; appearance: none;
   }
   input:focus { border-color: var(--accent); }
-  .iata-row { display: grid; grid-template-columns: 1fr auto 1fr; gap: 8px; align-items: center; }
-  .iata-sep { font-family: var(--mono); font-size: 13px; color: var(--muted); text-align: center; padding-top: 4px; }
   .calc-btn { background: var(--text); color: #fff; border: none; border-radius: 10px; padding: 14px; font-family: var(--mono); font-size: 14px; font-weight: 500; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; margin-top: 0.25rem; -webkit-appearance: none; transition: background 0.15s, transform 0.1s; }
   .calc-btn:active { transform: scale(0.98); background: #333; }
-  .calc-btn.loading { background: #555; cursor: wait; }
   .calc-btn .sun-btn { width: 14px; height: 14px; background: var(--sun); border-radius: 50%; flex-shrink: 0; }
-  .spinner-inline { width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.7s linear infinite; display: none; }
-  @keyframes spin { to { transform: rotate(360deg); } }
-  .error { font-family: var(--mono); font-size: 11px; color: #c0392b; min-height: 16px; line-height: 1.5; }
-  .api-key-row { display: flex; align-items: center; gap: 6px; }
-  .api-key-row input { flex: 1; font-size: 12px; }
-  .key-hint { font-family: var(--mono); font-size: 10px; color: var(--muted); margin-top: 3px; }
-  .key-hint a { color: var(--accent); text-decoration: none; }
-
+  .error { font-family: var(--mono); font-size: 11px; color: #c0392b; min-height: 16px; line-height: 1.6; }
+  .not-found-hint { font-family: var(--mono); font-size: 11px; color: var(--muted); margin-top: 4px; }
   .empty-state { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; color: var(--muted); padding: 3rem 0; }
   .empty-sun { width: 56px; height: 56px; background: #fde68a; border-radius: 50%; box-shadow: 0 0 0 12px #fef3c7; }
   .empty-state p { font-family: var(--mono); font-size: 12px; text-align: center; line-height: 1.7; }
-
   .result-header { display: flex; align-items: flex-start; gap: 1.25rem; }
   .side-badge { background: var(--accent-light); border: 1.5px solid var(--accent); border-radius: 12px; padding: 1rem 1.25rem; display: flex; flex-direction: column; align-items: center; min-width: 90px; flex-shrink: 0; }
   .side-badge .letter { font-family: var(--mono); font-size: 48px; font-weight: 500; color: var(--accent); line-height: 1; }
@@ -62,12 +52,10 @@
   .result-meta h2 { font-size: 17px; font-weight: 500; margin-bottom: 6px; }
   .result-meta p { font-size: 13px; color: var(--muted); line-height: 1.5; }
   .flight-tag { display: inline-block; background: var(--bg); border: 1px solid var(--border); border-radius: 4px; padding: 2px 8px; font-family: var(--mono); font-size: 11px; color: var(--muted); margin-bottom: 8px; }
-
   .stats-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
   .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 0.75rem; }
   .stat-card .val { font-family: var(--mono); font-size: 20px; font-weight: 500; color: var(--text); }
   .stat-card .lbl { font-family: var(--mono); font-size: 9px; color: var(--muted); margin-top: 3px; letter-spacing: 0.05em; text-transform: uppercase; }
-
   .timeline-section { display: flex; flex-direction: column; gap: 10px; }
   .tl-title { font-family: var(--mono); font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
   .bar-row { display: flex; align-items: center; gap: 10px; }
@@ -81,7 +69,6 @@
   .map-section { display: flex; flex-direction: column; gap: 8px; }
   .map-section canvas { border-radius: 8px; border: 1px solid var(--border); display: block; width: 100%; }
   .path-note { font-family: var(--mono); font-size: 11px; color: var(--muted); }
-  .divider { border: none; border-top: 1px dashed var(--border); margin: 0.1rem 0; }
 </style>
 </head>
 <body>
@@ -92,23 +79,18 @@
 </header>
 <main>
   <div class="sidebar">
-
     <div class="field">
       <label>Flight number</label>
       <input type="text" id="flightNum" placeholder="LH400" autocomplete="off" autocorrect="off" spellcheck="false" style="text-transform:uppercase;">
     </div>
-
     <div class="field">
       <label>Date</label>
       <input type="date" id="flightDate">
     </div>
-
     <div class="error" id="error"></div>
-
     <button class="calc-btn" id="calcBtn" onclick="findSunnySide()">
-      <div class="sun-btn" id="btnSun"></div>
-      <div class="spinner-inline" id="btnSpinner"></div>
-      <span id="btnLabel">Find my sunny side</span>
+      <div class="sun-btn"></div>
+      Find my sunny side
     </button>
   </div>
 
@@ -155,6 +137,272 @@
 </main>
 
 <script>
+
+// ============================================================
+// FLIGHT DATABASE
+// To add a flight: 'FLIGHTNO': { dep: 'XXX', arr: 'YYY', depTime: 'HH:MM', dur: hours }
+// depTime is LOCAL departure time at origin airport
+// dur is flight duration in decimal hours (e.g. 10.5 = 10h30m)
+// ============================================================
+const FLIGHTS = {
+  // Lufthansa
+  'LH400': { dep: 'FRA', arr: 'JFK', depTime: '10:55', dur: 9.5 },
+  'LH401': { dep: 'JFK', arr: 'FRA', depTime: '18:00', dur: 7.5 },
+  'LH404': { dep: 'FRA', arr: 'JFK', depTime: '15:30', dur: 9.5 },
+  'LH405': { dep: 'JFK', arr: 'FRA', depTime: '22:25', dur: 7.5 },
+  'LH406': { dep: 'FRA', arr: 'JFK', depTime: '10:30', dur: 9.5 },
+  'LH408': { dep: 'FRA', arr: 'ORD', depTime: '10:25', dur: 9.5 },
+  'LH410': { dep: 'FRA', arr: 'LAX', depTime: '15:30', dur: 11.5 },
+  'LH412': { dep: 'FRA', arr: 'SFO', depTime: '15:20', dur: 11.5 },
+  'LH418': { dep: 'FRA', arr: 'MIA', depTime: '10:15', dur: 10.5 },
+  'LH430': { dep: 'FRA', arr: 'BOS', depTime: '10:30', dur: 8.5 },
+  'LH440': { dep: 'FRA', arr: 'ATL', depTime: '10:20', dur: 10.0 },
+  'LH454': { dep: 'FRA', arr: 'SIN', depTime: '21:55', dur: 12.5 },
+  'LH758': { dep: 'FRA', arr: 'NRT', depTime: '13:25', dur: 11.5 },
+  'LH760': { dep: 'FRA', arr: 'HKG', depTime: '21:20', dur: 11.5 },
+  'LH772': { dep: 'FRA', arr: 'PEK', depTime: '13:20', dur: 9.5 },
+  'LH776': { dep: 'FRA', arr: 'PVG', depTime: '21:25', dur: 10.5 },
+  'LH736': { dep: 'FRA', arr: 'DEL', depTime: '21:10', dur: 8.0 },
+  'LH748': { dep: 'FRA', arr: 'BOM', depTime: '22:05', dur: 8.5 },
+  'LH630': { dep: 'FRA', arr: 'DXB', depTime: '14:10', dur: 6.0 },
+  'LH694': { dep: 'FRA', arr: 'JNB', depTime: '20:30', dur: 10.5 },
+  'LH548': { dep: 'FRA', arr: 'GRU', depTime: '22:55', dur: 11.5 },
+  'LH500': { dep: 'FRA', arr: 'MEX', depTime: '11:25', dur: 12.0 },
+  // British Airways
+  'BA112': { dep: 'LHR', arr: 'JFK', depTime: '09:25', dur: 7.5 },
+  'BA114': { dep: 'LHR', arr: 'JFK', depTime: '12:15', dur: 7.5 },
+  'BA116': { dep: 'LHR', arr: 'JFK', depTime: '18:00', dur: 7.5 },
+  'BA175': { dep: 'LHR', arr: 'JFK', depTime: '11:00', dur: 7.5 },
+  'BA177': { dep: 'LHR', arr: 'JFK', depTime: '15:30', dur: 7.5 },
+  'BA101': { dep: 'LHR', arr: 'JFK', depTime: '10:10', dur: 7.5 },
+  'BA103': { dep: 'LHR', arr: 'JFK', depTime: '14:00', dur: 7.5 },
+  'BA269': { dep: 'LHR', arr: 'LAX', depTime: '12:35', dur: 10.5 },
+  'BA279': { dep: 'LHR', arr: 'LAX', depTime: '15:30', dur: 10.5 },
+  'BA283': { dep: 'LHR', arr: 'SFO', depTime: '11:30', dur: 10.5 },
+  'BA285': { dep: 'LHR', arr: 'SFO', depTime: '15:25', dur: 10.5 },
+  'BA286': { dep: 'LHR', arr: 'JFK', depTime: '11:25', dur: 7.5 },
+  'BA213': { dep: 'LHR', arr: 'ORD', depTime: '12:00', dur: 8.5 },
+  'BA295': { dep: 'LHR', arr: 'MIA', depTime: '11:05', dur: 9.5 },
+  'BA217': { dep: 'LHR', arr: 'BOS', depTime: '11:20', dur: 7.0 },
+  'BA237': { dep: 'LHR', arr: 'ATL', depTime: '11:15', dur: 9.0 },
+  'BA9':   { dep: 'LHR', arr: 'SIN', depTime: '21:30', dur: 13.0 },
+  'BA11':  { dep: 'LHR', arr: 'SIN', depTime: '23:00', dur: 13.0 },
+  'BA31':  { dep: 'LHR', arr: 'HKG', depTime: '22:00', dur: 11.5 },
+  'BA5':   { dep: 'LHR', arr: 'NRT', depTime: '13:00', dur: 11.5 },
+  'BA7':   { dep: 'LHR', arr: 'NRT', depTime: '19:30', dur: 11.5 },
+  'BA117': { dep: 'LHR', arr: 'DEL', depTime: '21:40', dur: 8.5 },
+  'BA119': { dep: 'LHR', arr: 'DEL', depTime: '09:20', dur: 8.5 },
+  'BA139': { dep: 'LHR', arr: 'BOM', depTime: '21:30', dur: 9.0 },
+  'BA107': { dep: 'LHR', arr: 'BLR', depTime: '21:25', dur: 9.5 },
+  'BA105': { dep: 'LHR', arr: 'DXB', depTime: '14:30', dur: 7.0 },
+  'BA107': { dep: 'LHR', arr: 'DXB', depTime: '21:25', dur: 7.0 },
+  'BA43':  { dep: 'LHR', arr: 'JNB', depTime: '18:20', dur: 11.0 },
+  'BA55':  { dep: 'LHR', arr: 'NBO', depTime: '20:00', dur: 8.5 },
+  'BA245': { dep: 'LHR', arr: 'GRU', depTime: '21:30', dur: 11.5 },
+  'BA247': { dep: 'LHR', arr: 'EZE', depTime: '13:45', dur: 14.0 },
+  'BA303': { dep: 'LHR', arr: 'YYZ', depTime: '10:30', dur: 8.0 },
+  'BA93':  { dep: 'LHR', arr: 'SYD', depTime: '17:00', dur: 21.5 },
+  // Emirates
+  'EK001': { dep: 'DXB', arr: 'LHR', depTime: '08:35', dur: 7.5 },
+  'EK003': { dep: 'DXB', arr: 'LHR', depTime: '14:30', dur: 7.5 },
+  'EK002': { dep: 'LHR', arr: 'DXB', depTime: '14:30', dur: 7.0 },
+  'EK004': { dep: 'LHR', arr: 'DXB', depTime: '21:30', dur: 7.0 },
+  'EK201': { dep: 'DXB', arr: 'JFK', depTime: '08:20', dur: 13.5 },
+  'EK203': { dep: 'DXB', arr: 'JFK', depTime: '23:30', dur: 13.5 },
+  'EK215': { dep: 'DXB', arr: 'LAX', depTime: '08:45', dur: 16.5 },
+  'EK225': { dep: 'DXB', arr: 'SFO', depTime: '09:55', dur: 16.5 },
+  'EK241': { dep: 'DXB', arr: 'ORD', depTime: '09:00', dur: 14.5 },
+  'EK231': { dep: 'DXB', arr: 'MIA', depTime: '08:35', dur: 14.5 },
+  'EK405': { dep: 'DXB', arr: 'SIN', depTime: '10:30', dur: 7.0 },
+  'EK407': { dep: 'DXB', arr: 'SIN', depTime: '23:59', dur: 7.0 },
+  'EK501': { dep: 'DXB', arr: 'BOM', depTime: '07:40', dur: 3.0 },
+  'EK505': { dep: 'DXB', arr: 'DEL', depTime: '10:05', dur: 3.5 },
+  'EK521': { dep: 'DXB', arr: 'BLR', depTime: '09:45', dur: 4.0 },
+  'EK524': { dep: 'BLR', arr: 'DXB', depTime: '03:00', dur: 4.0 },
+  'EK771': { dep: 'DXB', arr: 'NRT', depTime: '09:55', dur: 9.5 },
+  'EK317': { dep: 'DXB', arr: 'JNB', depTime: '08:25', dur: 8.5 },
+  'EK761': { dep: 'DXB', arr: 'SYD', depTime: '22:20', dur: 14.0 },
+  'EK035': { dep: 'DXB', arr: 'FRA', depTime: '08:00', dur: 7.0 },
+  'EK045': { dep: 'DXB', arr: 'CDG', depTime: '08:15', dur: 7.0 },
+  // Qatar Airways
+  'QR001': { dep: 'DOH', arr: 'LHR', depTime: '07:55', dur: 7.0 },
+  'QR003': { dep: 'DOH', arr: 'LHR', depTime: '13:50', dur: 7.0 },
+  'QR002': { dep: 'LHR', arr: 'DOH', depTime: '21:30', dur: 6.5 },
+  'QR017': { dep: 'DOH', arr: 'JFK', depTime: '06:55', dur: 13.5 },
+  'QR019': { dep: 'DOH', arr: 'JFK', depTime: '22:45', dur: 13.5 },
+  'QR735': { dep: 'DOH', arr: 'BLR', depTime: '09:15', dur: 4.5 },
+  'QR500': { dep: 'DOH', arr: 'DEL', depTime: '10:30', dur: 4.0 },
+  'QR556': { dep: 'DOH', arr: 'BOM', depTime: '11:20', dur: 3.5 },
+  'QR833': { dep: 'DOH', arr: 'SIN', depTime: '01:55', dur: 7.0 },
+  'QR817': { dep: 'DOH', arr: 'SYD', depTime: '02:15', dur: 14.0 },
+  'QR161': { dep: 'DOH', arr: 'FRA', depTime: '08:00', dur: 6.5 },
+  'QR037': { dep: 'DOH', arr: 'LAX', depTime: '08:20', dur: 16.5 },
+  'QR777': { dep: 'DOH', arr: 'NRT', depTime: '08:45', dur: 10.0 },
+  // Singapore Airlines
+  'SQ321': { dep: 'SIN', arr: 'LHR', depTime: '23:55', dur: 13.0 },
+  'SQ317': { dep: 'SIN', arr: 'LHR', depTime: '01:30', dur: 13.0 },
+  'SQ322': { dep: 'LHR', arr: 'SIN', depTime: '21:30', dur: 13.0 },
+  'SQ25':  { dep: 'SIN', arr: 'JFK', depTime: '23:55', dur: 18.5 },
+  'SQ26':  { dep: 'JFK', arr: 'SIN', depTime: '10:30', dur: 18.5 },
+  'SQ37':  { dep: 'SIN', arr: 'LAX', depTime: '00:05', dur: 17.5 },
+  'SQ001': { dep: 'SIN', arr: 'JFK', depTime: '23:25', dur: 18.5 },
+  'SQ007': { dep: 'SIN', arr: 'SFO', depTime: '00:25', dur: 17.0 },
+  'SQ469': { dep: 'SIN', arr: 'DEL', depTime: '09:00', dur: 5.5 },
+  'SQ423': { dep: 'SIN', arr: 'BOM', depTime: '09:30', dur: 5.5 },
+  'SQ421': { dep: 'SIN', arr: 'BLR', depTime: '11:45', dur: 4.5 },
+  'SQ435': { dep: 'SIN', arr: 'HYD', depTime: '11:15', dur: 5.0 },
+  'SQ833': { dep: 'SIN', arr: 'SYD', depTime: '07:55', dur: 7.5 },
+  'SQ231': { dep: 'SIN', arr: 'NRT', depTime: '10:50', dur: 7.0 },
+  'SQ801': { dep: 'SIN', arr: 'HKG', depTime: '07:55', dur: 3.5 },
+  // Air India
+  'AI101': { dep: 'DEL', arr: 'JFK', depTime: '14:10', dur: 15.5 },
+  'AI102': { dep: 'JFK', arr: 'DEL', depTime: '22:00', dur: 14.0 },
+  'AI111': { dep: 'DEL', arr: 'ORD', depTime: '02:15', dur: 14.5 },
+  'AI127': { dep: 'DEL', arr: 'SFO', depTime: '03:00', dur: 15.5 },
+  'AI131': { dep: 'DEL', arr: 'LHR', depTime: '14:10', dur: 9.0 },
+  'AI132': { dep: 'LHR', arr: 'DEL', depTime: '21:30', dur: 8.5 },
+  'AI113': { dep: 'DEL', arr: 'LAX', depTime: '15:30', dur: 16.0 },
+  'AI191': { dep: 'BLR', arr: 'LHR', depTime: '04:35', dur: 9.5 },
+  'AI192': { dep: 'LHR', arr: 'BLR', depTime: '21:25', dur: 9.5 },
+  'AI175': { dep: 'BLR', arr: 'SFO', depTime: '22:30', dur: 17.0 },
+  'AI176': { dep: 'SFO', arr: 'BLR', depTime: '10:30', dur: 17.5 },
+  // IndiGo
+  '6E11':  { dep: 'BLR', arr: 'DXB', depTime: '05:30', dur: 3.5 },
+  '6E12':  { dep: 'DXB', arr: 'BLR', depTime: '12:30', dur: 3.5 },
+  '6E85':  { dep: 'DEL', arr: 'DXB', depTime: '06:00', dur: 3.5 },
+  '6E86':  { dep: 'DXB', arr: 'DEL', depTime: '13:30', dur: 3.5 },
+  // Etihad
+  'EY001': { dep: 'AUH', arr: 'LHR', depTime: '08:15', dur: 7.5 },
+  'EY002': { dep: 'LHR', arr: 'AUH', depTime: '21:10', dur: 7.0 },
+  'EY101': { dep: 'AUH', arr: 'JFK', depTime: '09:00', dur: 13.0 },
+  'EY103': { dep: 'AUH', arr: 'JFK', depTime: '22:30', dur: 13.0 },
+  'EY201': { dep: 'AUH', arr: 'SYD', depTime: '22:05', dur: 14.5 },
+  'EY203': { dep: 'AUH', arr: 'MEL', depTime: '22:35', dur: 14.0 },
+  'EY205': { dep: 'AUH', arr: 'SYD', depTime: '10:05', dur: 14.5 },
+  'EY281': { dep: 'AUH', arr: 'BLR', depTime: '11:50', dur: 4.0 },
+  'EY204': { dep: 'SYD', arr: 'AUH', depTime: '16:00', dur: 14.5 },
+  // Air France
+  'AF006': { dep: 'CDG', arr: 'LAX', depTime: '10:55', dur: 11.5 },
+  'AF010': { dep: 'CDG', arr: 'LAX', depTime: '14:10', dur: 11.5 },
+  'AF022': { dep: 'CDG', arr: 'SFO', depTime: '11:20', dur: 11.5 },
+  'AF066': { dep: 'CDG', arr: 'JFK', depTime: '10:15', dur: 8.0 },
+  'AF068': { dep: 'CDG', arr: 'JFK', depTime: '13:30', dur: 8.0 },
+  'AF160': { dep: 'CDG', arr: 'NRT', depTime: '12:55', dur: 12.5 },
+  'AF264': { dep: 'CDG', arr: 'DEL', depTime: '22:30', dur: 8.5 },
+  'AF192': { dep: 'CDG', arr: 'SIN', depTime: '23:30', dur: 12.5 },
+  'AF560': { dep: 'CDG', arr: 'DXB', depTime: '15:30', dur: 6.5 },
+  'AF104': { dep: 'CDG', arr: 'GRU', depTime: '23:30', dur: 11.5 },
+  'AF900': { dep: 'CDG', arr: 'JNB', depTime: '22:05', dur: 10.5 },
+  // KLM
+  'KL641': { dep: 'AMS', arr: 'JFK', depTime: '09:50', dur: 8.5 },
+  'KL643': { dep: 'AMS', arr: 'JFK', depTime: '14:00', dur: 8.5 },
+  'KL601': { dep: 'AMS', arr: 'SFO', depTime: '12:30', dur: 11.5 },
+  'KL605': { dep: 'AMS', arr: 'LAX', depTime: '11:35', dur: 11.5 },
+  'KL867': { dep: 'AMS', arr: 'NRT', depTime: '13:30', dur: 11.5 },
+  'KL877': { dep: 'AMS', arr: 'SIN', depTime: '22:30', dur: 12.5 },
+  'KL871': { dep: 'AMS', arr: 'HKG', depTime: '21:20', dur: 11.5 },
+  'KL837': { dep: 'AMS', arr: 'DEL', depTime: '22:35', dur: 8.5 },
+  'KL855': { dep: 'AMS', arr: 'BOM', depTime: '21:45', dur: 9.0 },
+  'KL571': { dep: 'AMS', arr: 'DXB', depTime: '14:45', dur: 6.5 },
+  'KL589': { dep: 'AMS', arr: 'JNB', depTime: '21:55', dur: 10.5 },
+  'KL703': { dep: 'AMS', arr: 'GRU', depTime: '23:35', dur: 11.5 },
+  // United Airlines
+  'UA1':   { dep: 'JFK', arr: 'LAX', depTime: '08:00', dur: 5.5 },
+  'UA14':  { dep: 'SFO', arr: 'NRT', depTime: '10:55', dur: 10.5 },
+  'UA837': { dep: 'SFO', arr: 'SIN', depTime: '00:01', dur: 17.5 },
+  'UA863': { dep: 'SFO', arr: 'SYD', depTime: '23:30', dur: 15.0 },
+  'UA857': { dep: 'SFO', arr: 'HKG', depTime: '00:55', dur: 15.0 },
+  'UA901': { dep: 'ORD', arr: 'LHR', depTime: '18:00', dur: 8.5 },
+  'UA903': { dep: 'ORD', arr: 'FRA', depTime: '18:30', dur: 9.0 },
+  'UA918': { dep: 'FRA', arr: 'ORD', depTime: '12:30', dur: 9.5 },
+  'UA931': { dep: 'FRA', arr: 'SFO', depTime: '13:10', dur: 11.0 },
+  // American Airlines
+  'AA100': { dep: 'JFK', arr: 'LHR', depTime: '22:15', dur: 7.0 },
+  'AA106': { dep: 'JFK', arr: 'LHR', depTime: '18:05', dur: 7.0 },
+  'AA6':   { dep: 'JFK', arr: 'LAX', depTime: '07:00', dur: 5.5 },
+  'AA57':  { dep: 'JFK', arr: 'SFO', depTime: '11:00', dur: 6.5 },
+  'AA259': { dep: 'JFK', arr: 'DXB', depTime: '23:00', dur: 12.5 },
+  'AA191': { dep: 'LAX', arr: 'LHR', depTime: '16:20', dur: 10.5 },
+  'AA137': { dep: 'LAX', arr: 'SYD', depTime: '23:30', dur: 15.0 },
+  // Delta
+  'DL1':   { dep: 'JFK', arr: 'LAX', depTime: '08:00', dur: 5.5 },
+  'DL401': { dep: 'JFK', arr: 'LHR', depTime: '21:45', dur: 7.0 },
+  'DL403': { dep: 'JFK', arr: 'LHR', depTime: '18:00', dur: 7.0 },
+  'DL405': { dep: 'JFK', arr: 'CDG', depTime: '18:50', dur: 7.5 },
+  'DL407': { dep: 'JFK', arr: 'CDG', depTime: '22:25', dur: 7.5 },
+  'DL415': { dep: 'JFK', arr: 'AMS', depTime: '23:05', dur: 8.0 },
+  'DL261': { dep: 'JFK', arr: 'NRT', depTime: '12:05', dur: 14.0 },
+  'DL159': { dep: 'LAX', arr: 'SYD', depTime: '23:30', dur: 15.0 },
+  // Cathay Pacific
+  'CX251': { dep: 'HKG', arr: 'LHR', depTime: '23:55', dur: 13.0 },
+  'CX231': { dep: 'HKG', arr: 'JFK', depTime: '01:15', dur: 16.0 },
+  'CX881': { dep: 'HKG', arr: 'LAX', depTime: '00:15', dur: 13.5 },
+  'CX101': { dep: 'HKG', arr: 'SIN', depTime: '08:30', dur: 3.5 },
+  'CX715': { dep: 'HKG', arr: 'SYD', depTime: '09:35', dur: 9.0 },
+  'CX767': { dep: 'HKG', arr: 'NRT', depTime: '09:40', dur: 4.0 },
+  'CX471': { dep: 'HKG', arr: 'DEL', depTime: '10:30', dur: 5.5 },
+  // Japan Airlines / ANA
+  'JL044': { dep: 'NRT', arr: 'LHR', depTime: '11:30', dur: 13.0 },
+  'JL006': { dep: 'NRT', arr: 'LAX', depTime: '17:00', dur: 9.5 },
+  'JL046': { dep: 'NRT', arr: 'FRA', depTime: '11:00', dur: 12.5 },
+  'JL061': { dep: 'NRT', arr: 'JFK', depTime: '11:30', dur: 13.5 },
+  'NH211': { dep: 'NRT', arr: 'LAX', depTime: '17:25', dur: 9.5 },
+  'NH210': { dep: 'LAX', arr: 'NRT', depTime: '00:15', dur: 11.5 },
+  'NH205': { dep: 'NRT', arr: 'JFK', depTime: '10:45', dur: 13.5 },
+  'NH110': { dep: 'NRT', arr: 'LHR', depTime: '10:00', dur: 13.0 },
+  // Turkish Airlines
+  'TK1':   { dep: 'IST', arr: 'JFK', depTime: '12:00', dur: 10.5 },
+  'TK3':   { dep: 'IST', arr: 'LAX', depTime: '12:30', dur: 13.0 },
+  'TK11':  { dep: 'IST', arr: 'LHR', depTime: '06:15', dur: 4.0 },
+  'TK13':  { dep: 'IST', arr: 'LHR', depTime: '10:00', dur: 4.0 },
+  'TK15':  { dep: 'IST', arr: 'LHR', depTime: '17:30', dur: 4.0 },
+  'TK71':  { dep: 'IST', arr: 'SIN', depTime: '00:15', dur: 10.5 },
+  'TK016': { dep: 'IST', arr: 'NRT', depTime: '01:30', dur: 11.5 },
+  'TK712': { dep: 'IST', arr: 'DXB', depTime: '06:35', dur: 4.0 },
+  'TK780': { dep: 'IST', arr: 'JNB', depTime: '01:30', dur: 10.0 },
+  // Swiss
+  'LX014': { dep: 'ZRH', arr: 'JFK', depTime: '10:30', dur: 9.5 },
+  'LX016': { dep: 'ZRH', arr: 'JFK', depTime: '13:30', dur: 9.5 },
+  'LX022': { dep: 'ZRH', arr: 'LAX', depTime: '12:30', dur: 12.0 },
+  'LX018': { dep: 'ZRH', arr: 'SFO', depTime: '12:05', dur: 12.0 },
+  'LX188': { dep: 'ZRH', arr: 'SIN', depTime: '22:15', dur: 12.5 },
+  'LX138': { dep: 'ZRH', arr: 'NRT', depTime: '12:30', dur: 12.0 },
+  'LX176': { dep: 'ZRH', arr: 'HKG', depTime: '22:15', dur: 12.0 },
+  // Qantas
+  'QF1':   { dep: 'SYD', arr: 'LHR', depTime: '16:00', dur: 22.0 },
+  'QF2':   { dep: 'LHR', arr: 'SYD', depTime: '17:00', dur: 22.0 },
+  'QF7':   { dep: 'SYD', arr: 'LAX', depTime: '12:20', dur: 13.5 },
+  'QF11':  { dep: 'SYD', arr: 'JFK', depTime: '17:00', dur: 20.0 },
+  'QF107': { dep: 'SYD', arr: 'SIN', depTime: '12:00', dur: 8.0 },
+  'QF1':   { dep: 'SYD', arr: 'DXB', depTime: '16:00', dur: 14.0 },
+  // Virgin Atlantic
+  'VS3':   { dep: 'LHR', arr: 'JFK', depTime: '11:30', dur: 7.5 },
+  'VS25':  { dep: 'LHR', arr: 'JFK', depTime: '15:30', dur: 7.5 },
+  'VS43':  { dep: 'LHR', arr: 'LAX', depTime: '13:00', dur: 10.5 },
+  'VS45':  { dep: 'LHR', arr: 'SFO', depTime: '11:30', dur: 10.5 },
+  'VS401': { dep: 'LHR', arr: 'HKG', depTime: '22:20', dur: 11.5 },
+  // Iberia
+  'IB6253':{ dep: 'MAD', arr: 'JFK', depTime: '10:40', dur: 8.5 },
+  'IB6255':{ dep: 'MAD', arr: 'JFK', depTime: '16:55', dur: 8.5 },
+  'IB6307':{ dep: 'MAD', arr: 'GRU', depTime: '21:30', dur: 11.0 },
+  'IB6275':{ dep: 'MAD', arr: 'MEX', depTime: '10:55', dur: 11.5 },
+  // Finnair
+  'AY1':   { dep: 'HEL', arr: 'JFK', depTime: '14:00', dur: 9.5 },
+  'AY5':   { dep: 'HEL', arr: 'LAX', depTime: '14:25', dur: 12.5 },
+  'AY71':  { dep: 'HEL', arr: 'NRT', depTime: '16:05', dur: 9.5 },
+  'AY79':  { dep: 'HEL', arr: 'PEK', depTime: '15:35', dur: 8.5 },
+  'AY83':  { dep: 'HEL', arr: 'HKG', depTime: '15:20', dur: 9.5 },
+  'AY141': { dep: 'HEL', arr: 'DEL', depTime: '16:10', dur: 7.5 },
+  'AY143': { dep: 'HEL', arr: 'BLR', depTime: '16:10', dur: 8.0 },
+  // Scandinavian
+  'SK901': { dep: 'CPH', arr: 'JFK', depTime: '10:35', dur: 9.0 },
+  'SK903': { dep: 'CPH', arr: 'LAX', depTime: '10:25', dur: 11.5 },
+  'SK945': { dep: 'CPH', arr: 'NRT', depTime: '13:00', dur: 11.5 },
+};
+
+// ============================================================
+// AIRPORT DATABASE
+// ============================================================
 const AIRPORTS = {
   FRA:{lat:50.033,lng:8.571,tz:1},AMS:{lat:52.309,lng:4.764,tz:1},LHR:{lat:51.477,lng:-0.461,tz:0},
   CDG:{lat:49.013,lng:2.550,tz:1},MAD:{lat:40.494,lng:-3.567,tz:1},FCO:{lat:41.800,lng:12.252,tz:1},
@@ -167,7 +415,8 @@ const AIRPORTS = {
   GRU:{lat:-23.432,lng:-46.469,tz:-3},EZE:{lat:-34.822,lng:-58.536,tz:-3},
   YYZ:{lat:43.677,lng:-79.631,tz:-5},YVR:{lat:49.195,lng:-123.184,tz:-8},MEX:{lat:19.436,lng:-99.072,tz:-6},
   CPT:{lat:-33.965,lng:18.602,tz:2},JNB:{lat:-26.134,lng:28.242,tz:2},NBO:{lat:-1.319,lng:36.926,tz:3},
-  DEL:{lat:28.556,lng:77.100,tz:5.5},BOM:{lat:19.089,lng:72.868,tz:5.5},
+  DEL:{lat:28.556,lng:77.100,tz:5.5},BOM:{lat:19.089,lng:72.868,tz:5.5},BLR:{lat:13.198,lng:77.706,tz:5.5},
+  HYD:{lat:17.231,lng:78.430,tz:5.5},MAA:{lat:12.990,lng:80.169,tz:5.5},
   PEK:{lat:40.080,lng:116.584,tz:8},PVG:{lat:31.144,lng:121.805,tz:8},ICN:{lat:37.469,lng:126.451,tz:9},
   IST:{lat:41.275,lng:28.752,tz:3},DOH:{lat:25.261,lng:51.565,tz:3},AUH:{lat:24.433,lng:54.651,tz:4},
   LOS:{lat:6.577,lng:3.321,tz:1},ACC:{lat:5.605,lng:-0.167,tz:0},CMN:{lat:33.368,lng:-7.590,tz:1},
@@ -182,23 +431,15 @@ const AIRPORTS = {
   TLV:{lat:32.011,lng:34.887,tz:2},CAI:{lat:30.121,lng:31.406,tz:2},
   KUL:{lat:2.745,lng:101.710,tz:8},CGK:{lat:-6.126,lng:106.656,tz:7},
   MNL:{lat:14.509,lng:121.020,tz:8},TPE:{lat:25.077,lng:121.233,tz:8},
-  SVO:{lat:55.973,lng:37.415,tz:3},DME:{lat:55.408,lng:37.906,tz:3},
   GIG:{lat:-22.810,lng:-43.250,tz:-3},SCL:{lat:-33.393,lng:-70.786,tz:-4},
   LIM:{lat:-12.022,lng:-77.114,tz:-5},BOG:{lat:4.702,lng:-74.146,tz:-5},
   ADD:{lat:8.978,lng:38.799,tz:3},DAR:{lat:-6.878,lng:39.203,tz:3},
-  BEY:{lat:33.821,lng:35.488,tz:2},AMM:{lat:31.723,lng:35.993,tz:2},
   KWI:{lat:29.227,lng:47.969,tz:3},BAH:{lat:26.271,lng:50.634,tz:3},
-  MCT:{lat:23.593,lng:58.285,tz:4},KHI:{lat:24.906,lng:67.161,tz:5},
-  LHE:{lat:31.521,lng:74.404,tz:5},DAC:{lat:23.843,lng:90.398,tz:6},
-  CMB:{lat:7.180,lng:79.884,tz:5.5},MLE:{lat:4.192,lng:73.529,tz:5},
-  RUH:{lat:24.958,lng:46.699,tz:3},JED:{lat:21.680,lng:39.156,tz:3},
-  HND:{lat:35.549,lng:139.780,tz:9},BLR:{lat:13.198,lng:77.706,tz:5.5},
+  MCT:{lat:23.593,lng:58.285,tz:4},RUH:{lat:24.958,lng:46.699,tz:3},JED:{lat:21.680,lng:39.156,tz:3},
+  HND:{lat:35.549,lng:139.780,tz:9},
 };
 
-const AVIATION_KEY = 'b537fa66b437ff44c821290a1f81544b';
-
-async function findSunnySide() {
-  const apiKey = AVIATION_KEY;
+function findSunnySide() {
   const flightNum = document.getElementById('flightNum').value.toUpperCase().trim().replace(/\s/g,'');
   const flightDate = document.getElementById('flightDate').value;
   const errEl = document.getElementById('error');
@@ -207,68 +448,22 @@ async function findSunnySide() {
   if (!flightNum) { errEl.textContent = 'Please enter a flight number.'; return; }
   if (!flightDate) { errEl.textContent = 'Please enter a date.'; return; }
 
-  setLoading(true);
-
-  try {
-    // Use routes endpoint (available on free plan)
-    const routeUrl = `https://ancient-water-ef87.roliagrawal.workers.dev?endpoint=routes&params=flight_iata=${flightNum}%26limit=1`;
-    const routeRes = await fetch(routeUrl);
-    const routeData = await routeRes.json();
-
-    let dep, arr, depUTC, dur;
-
-    if (routeData.data && routeData.data.length > 0) {
-      const r = routeData.data[0];
-      dep = r.departure?.iata?.toUpperCase();
-      arr = r.arrival?.iata?.toUpperCase();
-
-      if (r.departure?.time) {
-        const [hr, mn] = r.departure.time.split(':').map(Number);
-        const [yr, mo, dy] = flightDate.split('-').map(Number);
-        const depTz = AIRPORTS[dep]?.tz || 0;
-        depUTC = new Date(Date.UTC(yr, mo-1, dy, hr - depTz, mn));
-      }
-
-      if (r.departure?.time && r.arrival?.time) {
-        const [dh, dm] = r.departure.time.split(':').map(Number);
-        const [ah, am] = r.arrival.time.split(':').map(Number);
-        dur = ((ah * 60 + am) - (dh * 60 + dm)) / 60;
-        if (dur < 0) dur += 24; // overnight flight
-      }
-    }
-
-    if (!dep || !arr) {
-      errEl.textContent = `Flight ${flightNum} not found. Check the number and try again.`;
-      setLoading(false);
-      return;
-    }
-
-    if (!AIRPORTS[dep]) {
-      errEl.textContent = `Departure airport ${dep} not in database. Use manual mode.`;
-      setLoading(false);
-      return;
-    }
-    if (!AIRPORTS[arr]) {
-      errEl.textContent = `Arrival airport ${arr} not in database. Use manual mode.`;
-      setLoading(false);
-      return;
-    }
-
-    runCalculation(dep, arr, depUTC, dur, flightNum);
-
-  } catch(e) {
-    errEl.textContent = 'Lookup failed. Check your API key and connection.';
-    setLoading(false);
+  const flight = FLIGHTS[flightNum];
+  if (!flight) {
+    errEl.innerHTML = `Flight ${flightNum} not in database.<br><span style="color:var(--muted)">Ask your admin to add it — it takes 30 seconds.</span>`;
+    return;
   }
-}
 
-function setLoading(on) {
-  const btn = document.getElementById('calcBtn');
-  btn.classList.toggle('loading', on);
-  document.getElementById('btnSun').style.display = on ? 'none' : 'block';
-  document.getElementById('btnSpinner').style.display = on ? 'block' : 'none';
-  document.getElementById('btnLabel').textContent = on ? 'Looking up flight...' : 'Find my sunny side';
-  btn.disabled = on;
+  const ap1 = AIRPORTS[flight.dep];
+  const ap2 = AIRPORTS[flight.arr];
+  if (!ap1 || !ap2) { errEl.textContent = `Airport data missing for this route.`; return; }
+
+  // Convert local departure time to UTC
+  const [hr, mn] = flight.depTime.split(':').map(Number);
+  const [yr, mo, dy] = flightDate.split('-').map(Number);
+  const depUTC = new Date(Date.UTC(yr, mo-1, dy, hr - ap1.tz, mn));
+
+  runCalculation(flight.dep, flight.arr, depUTC, flight.dur, flightNum);
 }
 
 function toRad(d){return d*Math.PI/180;}
@@ -388,10 +583,8 @@ function runCalculation(dep, arr, depUTC, dur, flightLabel) {
 
   document.getElementById('pathNote').textContent=
     `Great circle · ${dist.toLocaleString()} km · ${Math.round(dur*10)/10}h · ${flightLabel}`;
-
   document.getElementById('emptyState').style.display='none';
   document.getElementById('result').style.display='flex';
-  setLoading(false);
 
   if(window.innerWidth<=640){
     setTimeout(()=>document.getElementById('result').scrollIntoView({behavior:'smooth'}),100);
