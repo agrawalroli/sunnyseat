@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Azimuth — Window Seat Optimizer</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #f7f5f0; --surface: #ffffff; --border: #e0ddd6;
+    --text: #1a1917; --muted: #7a7770; --accent: #d4782a;
+    --accent-light: #fdf0e4; --sun: #f5a623; --shadow: #e8e4dc;
+    --mono: 'DM Mono', monospace; --sans: 'DM Sans', sans-serif;
+  }
+  body { font-family: var(--sans); background: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; -webkit-text-size-adjust: 100%; }
+  header { padding: 1rem 1.25rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; background: var(--surface); position: sticky; top: 0; z-index: 10; }
+  header h1 { font-family: var(--mono); font-size: 15px; font-weight: 500; }
+  header span { font-size: 12px; color: var(--muted); font-family: var(--mono); }
+  .sun-icon { width: 18px; height: 18px; background: var(--sun); border-radius: 50%; flex-shrink: 0; box-shadow: 0 0 0 4px #fde68a; }
+  main { flex: 1; display: grid; grid-template-columns: 300px 1fr; min-height: 0; }
+  .sidebar { background: var(--surface); border-right: 1px solid var(--border); padding: 1.5rem; display: flex; flex-direction: column; gap: 1.1rem; overflow-y: auto; }
+  .panel { padding: 2rem; display: flex; flex-direction: column; gap: 1.5rem; overflow-y: auto; }
+  @media (max-width: 640px) {
+    main { grid-template-columns: 1fr; grid-template-rows: auto 1fr; }
+    .sidebar { border-right: none; border-bottom: 1px solid var(--border); padding: 1.25rem; gap: 1rem; overflow-y: visible; }
+    .panel { padding: 1.25rem; gap: 1.25rem; }
+    header span { display: none; }
+  }
+  .field { display: flex; flex-direction: column; gap: 5px; }
+  label { font-family: var(--mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+  input[type="text"], input[type="date"], input[type="password"] {
+    background: var(--bg); border: 1px solid var(--border); border-radius: 6px;
+    padding: 10px 12px; font-family: var(--mono); font-size: 16px; font-weight: 500;
+    color: var(--text); outline: none; transition: border-color 0.15s; width: 100%;
+    -webkit-appearance: none; appearance: none;
+  }
+  input:focus { border-color: var(--accent); }
+  .iata-row { display: grid; grid-template-columns: 1fr auto 1fr; gap: 8px; align-items: center; }
+  .iata-sep { font-family: var(--mono); font-size: 13px; color: var(--muted); text-align: center; padding-top: 4px; }
+  .calc-btn { background: var(--text); color: #fff; border: none; border-radius: 10px; padding: 14px; font-family: var(--mono); font-size: 14px; font-weight: 500; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; margin-top: 0.25rem; -webkit-appearance: none; transition: background 0.15s, transform 0.1s; }
+  .calc-btn:active { transform: scale(0.98); background: #333; }
+  .calc-btn.loading { background: #555; cursor: wait; }
+  .calc-btn .sun-btn { width: 14px; height: 14px; background: var(--sun); border-radius: 50%; flex-shrink: 0; }
+  .spinner-inline { width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.7s linear infinite; display: none; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .error { font-family: var(--mono); font-size: 11px; color: #c0392b; min-height: 16px; line-height: 1.5; }
+  .api-key-row { display: flex; align-items: center; gap: 6px; }
+  .api-key-row input { flex: 1; font-size: 12px; }
+  .key-hint { font-family: var(--mono); font-size: 10px; color: var(--muted); margin-top: 3px; }
+  .key-hint a { color: var(--accent); text-decoration: none; }
+
+  .empty-state { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; color: var(--muted); padding: 3rem 0; }
+  .empty-sun { width: 56px; height: 56px; background: #fde68a; border-radius: 50%; box-shadow: 0 0 0 12px #fef3c7; }
+  .empty-state p { font-family: var(--mono); font-size: 12px; text-align: center; line-height: 1.7; }
+
+  .result-header { display: flex; align-items: flex-start; gap: 1.25rem; }
+  .side-badge { background: var(--accent-light); border: 1.5px solid var(--accent); border-radius: 12px; padding: 1rem 1.25rem; display: flex; flex-direction: column; align-items: center; min-width: 90px; flex-shrink: 0; }
+  .side-badge .letter { font-family: var(--mono); font-size: 48px; font-weight: 500; color: var(--accent); line-height: 1; }
+  .side-badge .side-lbl { font-family: var(--mono); font-size: 10px; color: var(--accent); letter-spacing: 0.06em; margin-top: 4px; }
+  .result-meta { flex: 1; min-width: 0; }
+  .result-meta h2 { font-size: 17px; font-weight: 500; margin-bottom: 6px; }
+  .result-meta p { font-size: 13px; color: var(--muted); line-height: 1.5; }
+  .flight-tag { display: inline-block; background: var(--bg); border: 1px solid var(--border); border-radius: 4px; padding: 2px 8px; font-family: var(--mono); font-size: 11px; color: var(--muted); margin-bottom: 8px; }
+
+  .stats-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+  .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 0.75rem; }
+  .stat-card .val { font-family: var(--mono); font-size: 20px; font-weight: 500; color: var(--text); }
+  .stat-card .lbl { font-family: var(--mono); font-size: 9px; color: var(--muted); margin-top: 3px; letter-spacing: 0.05em; text-transform: uppercase; }
+
+  .timeline-section { display: flex; flex-direction: column; gap: 10px; }
+  .tl-title { font-family: var(--mono); font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
+  .bar-row { display: flex; align-items: center; gap: 10px; }
+  .bar-lbl { font-family: var(--mono); font-size: 13px; font-weight: 500; width: 16px; color: var(--muted); flex-shrink: 0; }
+  .bar-track { flex: 1; height: 20px; border-radius: 5px; background: var(--shadow); overflow: hidden; display: flex; }
+  .seg { height: 100%; }
+  .time-row { display: flex; justify-content: space-between; padding-left: 26px; font-family: var(--mono); font-size: 9px; color: var(--muted); }
+  .legend { display: flex; gap: 12px; flex-wrap: wrap; }
+  .legend-item { display: flex; align-items: center; gap: 5px; font-family: var(--mono); font-size: 11px; color: var(--muted); }
+  .legend-dot { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
+  .map-section { display: flex; flex-direction: column; gap: 8px; }
+  .map-section canvas { border-radius: 8px; border: 1px solid var(--border); display: block; width: 100%; }
+  .path-note { font-family: var(--mono); font-size: 11px; color: var(--muted); }
+  .divider { border: none; border-top: 1px dashed var(--border); margin: 0.1rem 0; }
+</style>
+</head>
+<body>
+<header>
+  <div class="sun-icon"></div>
+  <h1>azimuth</h1>
+  <span>/ window seat optimizer</span>
+</header>
+<main>
+  <div class="sidebar">
+
+    <div class="field">
+      <label>Flight number</label>
+      <input type="text" id="flightNum" placeholder="LH400" autocomplete="off" autocorrect="off" spellcheck="false" style="text-transform:uppercase;">
+    </div>
+
+    <div class="field">
+      <label>Date</label>
+      <input type="date" id="flightDate">
+    </div>
+
+    <div class="error" id="error"></div>
+
+    <button class="calc-btn" id="calcBtn" onclick="findSunnySide()">
+      <div class="sun-btn" id="btnSun"></div>
+      <div class="spinner-inline" id="btnSpinner"></div>
+      <span id="btnLabel">Find my sunny side</span>
+    </button>
+  </div>
+
+  <div class="panel">
+    <div class="empty-state" id="emptyState">
+      <div class="empty-sun"></div>
+      <p>Enter your flight number and date,<br>then hit the button.<br>We'll do the rest.</p>
+    </div>
+    <div id="result" style="display:none; flex-direction:column; gap:1.25rem;">
+      <div class="result-header">
+        <div class="side-badge">
+          <div class="letter" id="sideLetterBig">A</div>
+          <div class="side-lbl">SIDE</div>
+        </div>
+        <div class="result-meta">
+          <div class="flight-tag" id="flightTagDisplay" style="display:none;"></div>
+          <h2 id="resultTitle">Sit on the A side</h2>
+          <p id="resultDesc"></p>
+        </div>
+      </div>
+      <div class="stats-row">
+        <div class="stat-card"><div class="val" id="aPct">—</div><div class="lbl">Side A sun</div></div>
+        <div class="stat-card"><div class="val" id="kPct">—</div><div class="lbl">Side K sun</div></div>
+        <div class="stat-card"><div class="val" id="distVal">—</div><div class="lbl">Distance</div></div>
+      </div>
+      <div class="timeline-section">
+        <div class="tl-title">Sun exposure timeline</div>
+        <div class="bar-row"><div class="bar-lbl">A</div><div class="bar-track" id="barA"></div></div>
+        <div class="bar-row"><div class="bar-lbl">K</div><div class="bar-track" id="barK"></div></div>
+        <div class="time-row" id="timeLabels"></div>
+        <div class="legend">
+          <div class="legend-item"><div class="legend-dot" style="background:#f5a623;"></div>Direct sun</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#bfdbfe;"></div>Other side</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#e0ddd6;"></div>Night</div>
+        </div>
+      </div>
+      <div class="map-section">
+        <div class="tl-title">Flight path</div>
+        <canvas id="pathCanvas" height="180"></canvas>
+        <div class="path-note" id="pathNote"></div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+const AIRPORTS = {
+  FRA:{lat:50.033,lng:8.571,tz:1},AMS:{lat:52.309,lng:4.764,tz:1},LHR:{lat:51.477,lng:-0.461,tz:0},
+  CDG:{lat:49.013,lng:2.550,tz:1},MAD:{lat:40.494,lng:-3.567,tz:1},FCO:{lat:41.800,lng:12.252,tz:1},
+  MUC:{lat:48.354,lng:11.786,tz:1},ZRH:{lat:47.464,lng:8.549,tz:1},VIE:{lat:48.110,lng:16.569,tz:1},
+  JFK:{lat:40.640,lng:-73.779,tz:-5},LAX:{lat:33.943,lng:-118.408,tz:-8},ORD:{lat:41.974,lng:-87.907,tz:-6},
+  MIA:{lat:25.796,lng:-80.287,tz:-5},SFO:{lat:37.619,lng:-122.375,tz:-8},BOS:{lat:42.365,lng:-71.010,tz:-5},
+  EWR:{lat:40.690,lng:-74.174,tz:-5},IAD:{lat:38.944,lng:-77.456,tz:-5},ATL:{lat:33.641,lng:-84.427,tz:-5},
+  DXB:{lat:25.252,lng:55.364,tz:4},SIN:{lat:1.359,lng:103.989,tz:8},NRT:{lat:35.765,lng:140.386,tz:9},
+  HKG:{lat:22.309,lng:113.915,tz:8},BKK:{lat:13.681,lng:100.747,tz:7},SYD:{lat:-33.946,lng:151.177,tz:10},
+  GRU:{lat:-23.432,lng:-46.469,tz:-3},EZE:{lat:-34.822,lng:-58.536,tz:-3},
+  YYZ:{lat:43.677,lng:-79.631,tz:-5},YVR:{lat:49.195,lng:-123.184,tz:-8},MEX:{lat:19.436,lng:-99.072,tz:-6},
+  CPT:{lat:-33.965,lng:18.602,tz:2},JNB:{lat:-26.134,lng:28.242,tz:2},NBO:{lat:-1.319,lng:36.926,tz:3},
+  DEL:{lat:28.556,lng:77.100,tz:5.5},BOM:{lat:19.089,lng:72.868,tz:5.5},
+  PEK:{lat:40.080,lng:116.584,tz:8},PVG:{lat:31.144,lng:121.805,tz:8},ICN:{lat:37.469,lng:126.451,tz:9},
+  IST:{lat:41.275,lng:28.752,tz:3},DOH:{lat:25.261,lng:51.565,tz:3},AUH:{lat:24.433,lng:54.651,tz:4},
+  LOS:{lat:6.577,lng:3.321,tz:1},ACC:{lat:5.605,lng:-0.167,tz:0},CMN:{lat:33.368,lng:-7.590,tz:1},
+  MEL:{lat:-37.673,lng:144.843,tz:10},AKL:{lat:-37.009,lng:174.792,tz:12},
+  DFW:{lat:32.897,lng:-97.038,tz:-6},SEA:{lat:47.449,lng:-122.309,tz:-8},
+  LIS:{lat:38.774,lng:-9.134,tz:0},BCN:{lat:41.297,lng:2.078,tz:1},
+  CPH:{lat:55.618,lng:12.656,tz:1},OSL:{lat:60.197,lng:11.100,tz:1},
+  ARN:{lat:59.652,lng:17.918,tz:1},HEL:{lat:60.317,lng:24.963,tz:2},
+  WAW:{lat:52.166,lng:20.967,tz:1},BRU:{lat:50.901,lng:4.484,tz:1},
+  DUS:{lat:51.289,lng:6.767,tz:1},HAM:{lat:53.630,lng:9.992,tz:1},
+  MXP:{lat:45.630,lng:8.728,tz:1},GVA:{lat:46.238,lng:6.109,tz:1},
+  TLV:{lat:32.011,lng:34.887,tz:2},CAI:{lat:30.121,lng:31.406,tz:2},
+  KUL:{lat:2.745,lng:101.710,tz:8},CGK:{lat:-6.126,lng:106.656,tz:7},
+  MNL:{lat:14.509,lng:121.020,tz:8},TPE:{lat:25.077,lng:121.233,tz:8},
+  SVO:{lat:55.973,lng:37.415,tz:3},DME:{lat:55.408,lng:37.906,tz:3},
+  GIG:{lat:-22.810,lng:-43.250,tz:-3},SCL:{lat:-33.393,lng:-70.786,tz:-4},
+  LIM:{lat:-12.022,lng:-77.114,tz:-5},BOG:{lat:4.702,lng:-74.146,tz:-5},
+  ADD:{lat:8.978,lng:38.799,tz:3},DAR:{lat:-6.878,lng:39.203,tz:3},
+  BEY:{lat:33.821,lng:35.488,tz:2},AMM:{lat:31.723,lng:35.993,tz:2},
+  KWI:{lat:29.227,lng:47.969,tz:3},BAH:{lat:26.271,lng:50.634,tz:3},
+  MCT:{lat:23.593,lng:58.285,tz:4},KHI:{lat:24.906,lng:67.161,tz:5},
+  LHE:{lat:31.521,lng:74.404,tz:5},DAC:{lat:23.843,lng:90.398,tz:6},
+  CMB:{lat:7.180,lng:79.884,tz:5.5},MLE:{lat:4.192,lng:73.529,tz:5},
+  RUH:{lat:24.958,lng:46.699,tz:3},JED:{lat:21.680,lng:39.156,tz:3},
+  HND:{lat:35.549,lng:139.780,tz:9},BLR:{lat:13.198,lng:77.706,tz:5.5},
+};
+
+const AVIATION_KEY = 'b537fa66b437ff44c821290a1f81544b';
+
+async function findSunnySide() {
+  const apiKey = AVIATION_KEY;
+  const flightNum = document.getElementById('flightNum').value.toUpperCase().trim().replace(/\s/g,'');
+  const flightDate = document.getElementById('flightDate').value;
+  const errEl = document.getElementById('error');
+  errEl.textContent = '';
+
+  if (!flightNum) { errEl.textContent = 'Please enter a flight number.'; return; }
+  if (!flightDate) { errEl.textContent = 'Please enter a date.'; return; }
+
+  setLoading(true);
+
+  try {
+    // Parse airline code and number
+    const airlineIata = flightNum.match(/^[A-Z]{2}/)?.[0] || flightNum.slice(0,2);
+    const flightNumber = flightNum.slice(airlineIata.length);
+
+    // Try real-time/recent flights endpoint first
+    const url = `https://api.aviationstack.com/v1/flights?access_key=${apiKey}&flight_iata=${flightNum}&flight_date=${flightDate}&limit=1`;
+    const res = await fetch(url);
+    const data = await res.json();
+
+    let dep, arr, depUTC, dur;
+
+    if (data.data && data.data.length > 0) {
+      const f = data.data[0];
+      dep = f.departure?.iata?.toUpperCase();
+      arr = f.arrival?.iata?.toUpperCase();
+
+      // Get departure time UTC
+      const depSched = f.departure?.scheduled;
+      if (depSched) {
+        const d = new Date(depSched);
+        depUTC = d;
+      }
+
+      // Calculate duration from scheduled times
+      const arrSched = f.arrival?.scheduled;
+      if (depSched && arrSched) {
+        const depMs = new Date(depSched).getTime();
+        const arrMs = new Date(arrSched).getTime();
+        dur = (arrMs - depMs) / 3600000;
+      }
+    }
+
+    // Fallback: try routes endpoint (gives scheduled times without date)
+    if (!dep || !arr || !depUTC || !dur) {
+      const routeUrl = `https://api.aviationstack.com/v1/routes?access_key=${apiKey}&flight_iata=${flightNum}&limit=1`;
+      const routeRes = await fetch(routeUrl);
+      const routeData = await routeRes.json();
+
+      if (routeData.data && routeData.data.length > 0) {
+        const r = routeData.data[0];
+        dep = dep || r.departure?.iata?.toUpperCase();
+        arr = arr || r.arrival?.iata?.toUpperCase();
+
+        if (!depUTC && r.departure?.time) {
+          // Combine flight date with scheduled time from route
+          const [hr, mn] = r.departure.time.split(':').map(Number);
+          const [yr, mo, dy] = flightDate.split('-').map(Number);
+          const depTz = AIRPORTS[dep]?.tz || 0;
+          depUTC = new Date(Date.UTC(yr, mo-1, dy, hr - depTz, mn));
+        }
+
+        if (!dur && r.departure?.time && r.arrival?.time) {
+          const [dh, dm] = r.departure.time.split(':').map(Number);
+          const [ah, am] = r.arrival.time.split(':').map(Number);
+          dur = ((ah * 60 + am) - (dh * 60 + dm)) / 60;
+          if (dur < 0) dur += 24; // overnight flight
+        }
+      }
+    }
+
+    if (!dep || !arr) {
+      errEl.textContent = `Flight ${flightNum} not found. Check the number and try again.`;
+      setLoading(false);
+      return;
+    }
+
+    if (!AIRPORTS[dep]) {
+      errEl.textContent = `Departure airport ${dep} not in database. Use manual mode.`;
+      setLoading(false);
+      return;
+    }
+    if (!AIRPORTS[arr]) {
+      errEl.textContent = `Arrival airport ${arr} not in database. Use manual mode.`;
+      setLoading(false);
+      return;
+    }
+
+    runCalculation(dep, arr, depUTC, dur, flightNum);
+
+  } catch(e) {
+    errEl.textContent = 'Lookup failed. Check your API key and connection.';
+    setLoading(false);
+  }
+}
+
+function setLoading(on) {
+  const btn = document.getElementById('calcBtn');
+  btn.classList.toggle('loading', on);
+  document.getElementById('btnSun').style.display = on ? 'none' : 'block';
+  document.getElementById('btnSpinner').style.display = on ? 'block' : 'none';
+  document.getElementById('btnLabel').textContent = on ? 'Looking up flight...' : 'Find my sunny side';
+  btn.disabled = on;
+}
+
+function toRad(d){return d*Math.PI/180;}
+function toDeg(r){return r*180/Math.PI;}
+
+function greatCirclePoints(lat1,lng1,lat2,lng2,n){
+  const pts=[];
+  for(let i=0;i<=n;i++){
+    const f=i/n;
+    const d=2*Math.asin(Math.sqrt(Math.pow(Math.sin(toRad(lat2-lat1)/2),2)+Math.cos(toRad(lat1))*Math.cos(toRad(lat2))*Math.pow(Math.sin(toRad(lng2-lng1)/2),2)));
+    if(d===0){pts.push({lat:lat1,lng:lng1});continue;}
+    const A=Math.sin((1-f)*d)/Math.sin(d);
+    const B=Math.sin(f*d)/Math.sin(d);
+    const x=A*Math.cos(toRad(lat1))*Math.cos(toRad(lng1))+B*Math.cos(toRad(lat2))*Math.cos(toRad(lng2));
+    const y=A*Math.cos(toRad(lat1))*Math.sin(toRad(lng1))+B*Math.cos(toRad(lat2))*Math.sin(toRad(lng2));
+    const z=A*Math.sin(toRad(lat1))+B*Math.sin(toRad(lat2));
+    pts.push({lat:toDeg(Math.atan2(z,Math.sqrt(x*x+y*y))),lng:toDeg(Math.atan2(y,x))});
+  }
+  return pts;
+}
+
+function bearing(lat1,lng1,lat2,lng2){
+  const dLng=toRad(lng2-lng1);
+  const y=Math.sin(dLng)*Math.cos(toRad(lat2));
+  const x=Math.cos(toRad(lat1))*Math.sin(toRad(lat2))-Math.sin(toRad(lat1))*Math.cos(toRad(lat2))*Math.cos(dLng);
+  return(toDeg(Math.atan2(y,x))+360)%360;
+}
+
+function sunPosition(date,lat,lng){
+  const JD=date.getTime()/86400000+2440587.5;
+  const n=JD-2451545.0;
+  const L=(280.46+0.9856474*n)%360;
+  const g=toRad((357.528+0.9856003*n)%360);
+  const lam=toRad(L+1.915*Math.sin(g)+0.020*Math.sin(2*g));
+  const eps=toRad(23.439-0.0000004*n);
+  const sinDec=Math.sin(eps)*Math.sin(lam);
+  const dec=Math.asin(sinDec);
+  const cosDec=Math.cos(dec);
+  const RA=Math.atan2(Math.cos(eps)*Math.sin(lam),Math.cos(lam));
+  const GMST=(280.46061837+360.98564736629*n)%360;
+  const LST=toRad((GMST+lng+360)%360);
+  const HA=LST-RA;
+  const latR=toRad(lat);
+  const alt=Math.asin(Math.sin(latR)*sinDec+Math.cos(latR)*cosDec*Math.cos(HA));
+  const az=Math.atan2(-Math.sin(HA),Math.tan(dec)*Math.cos(latR)-sinDec*Math.sin(latR)/cosDec);
+  return{alt:toDeg(alt),az:(toDeg(az)+360)%360};
+}
+
+function haversine(lat1,lng1,lat2,lng2){
+  const R=6371;
+  const dLat=toRad(lat2-lat1),dLng=toRad(lng2-lng1);
+  const a=Math.sin(dLat/2)**2+Math.cos(toRad(lat1))*Math.cos(toRad(lat2))*Math.sin(dLng/2)**2;
+  return Math.round(R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a)));
+}
+
+function runCalculation(dep, arr, depUTC, dur, flightLabel) {
+  const ap1=AIRPORTS[dep], ap2=AIRPORTS[arr];
+  const STEPS=60;
+  const pts=greatCirclePoints(ap1.lat,ap1.lng,ap2.lat,ap2.lng,STEPS);
+  const dtPerStep=(dur*3600*1000)/STEPS;
+  let aSun=0,kSun=0;
+  const segments=[];
+
+  for(let i=0;i<STEPS;i++){
+    const p=pts[i];
+    const pNext=pts[Math.min(i+1,STEPS)];
+    const t=new Date(depUTC.getTime()+i*dtPerStep);
+    const hdg=bearing(p.lat,p.lng,pNext.lat,pNext.lng);
+    const sun=sunPosition(t,p.lat,p.lng);
+    if(sun.alt<-6){segments.push({side:'none'});continue;}
+    const rel=((sun.az-hdg)+360)%360;
+    if(rel>0&&rel<180){kSun++;segments.push({side:'K'});}
+    else{aSun++;segments.push({side:'A'});}
+  }
+
+  const winner=aSun>=kSun?'A':'K';
+  const dist=haversine(ap1.lat,ap1.lng,ap2.lat,ap2.lng);
+  const aPct=Math.round(aSun/STEPS*100);
+  const kPct=Math.round(kSun/STEPS*100);
+
+  document.getElementById('sideLetterBig').textContent=winner;
+  document.getElementById('resultTitle').textContent=`Sit on the ${winner} side`;
+  document.getElementById('resultDesc').textContent=
+    winner==='A'
+    ?`Left side of the plane (facing forward). Sun on your side for ${aPct}% of the flight.`
+    :`Right side of the plane (facing forward). Sun on your side for ${kPct}% of the flight.`;
+
+  const tag=document.getElementById('flightTagDisplay');
+  tag.textContent=`${flightLabel} · ${dep} → ${arr} · ${Math.round(dur*10)/10}h`;
+  tag.style.display='inline-block';
+
+  document.getElementById('aPct').textContent=aPct+'%';
+  document.getElementById('kPct').textContent=kPct+'%';
+  document.getElementById('distVal').textContent=(dist>999?(dist/1000).toFixed(1)+'k':dist)+' km';
+
+  const barA=document.getElementById('barA'),barK=document.getElementById('barK');
+  barA.innerHTML=''; barK.innerHTML='';
+  segments.forEach(s=>{
+    const wa=document.createElement('div'); wa.className='seg';
+    wa.style.width=(100/STEPS)+'%';
+    wa.style.background=s.side==='A'?'#f5a623':s.side==='none'?'#e0ddd6':'#bfdbfe';
+    barA.appendChild(wa);
+    const wk=document.createElement('div'); wk.className='seg';
+    wk.style.width=(100/STEPS)+'%';
+    wk.style.background=s.side==='K'?'#f5a623':s.side==='none'?'#e0ddd6':'#bfdbfe';
+    barK.appendChild(wk);
+  });
+
+  const tlEl=document.getElementById('timeLabels');
+  tlEl.innerHTML='';
+  [0,0.25,0.5,0.75,1].forEach(f=>{
+    const t=new Date(depUTC.getTime()+f*dur*3600000);
+    const span=document.createElement('span');
+    span.textContent=t.getUTCHours().toString().padStart(2,'0')+':'+t.getUTCMinutes().toString().padStart(2,'0')+'Z';
+    tlEl.appendChild(span);
+  });
+
+  document.getElementById('pathNote').textContent=
+    `Great circle · ${dist.toLocaleString()} km · ${Math.round(dur*10)/10}h · ${flightLabel}`;
+
+  document.getElementById('emptyState').style.display='none';
+  document.getElementById('result').style.display='flex';
+  setLoading(false);
+
+  if(window.innerWidth<=640){
+    setTimeout(()=>document.getElementById('result').scrollIntoView({behavior:'smooth'}),100);
+  }
+  setTimeout(()=>drawMap(pts,ap1,ap2,dep,arr),100);
+}
+
+function drawMap(pts,ap1,ap2,dep,arr){
+  const canvas=document.getElementById('pathCanvas');
+  const W=canvas.offsetWidth*2;
+  const H=300;
+  canvas.width=W; canvas.height=H;
+  const ctx=canvas.getContext('2d');
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle='#f0ece4'; ctx.fillRect(0,0,W,H);
+  const lats=pts.map(p=>p.lat),lngs=pts.map(p=>p.lng);
+  const pad=40;
+  const minLat=Math.min(...lats)-10,maxLat=Math.max(...lats)+10;
+  const minLng=Math.min(...lngs)-14,maxLng=Math.max(...lngs)+14;
+  const toX=lng=>pad+(lng-minLng)/(maxLng-minLng)*(W-2*pad);
+  const toY=lat=>H-pad-(lat-minLat)/(maxLat-minLat)*(H-2*pad);
+  ctx.strokeStyle='rgba(0,0,0,0.05)'; ctx.lineWidth=1;
+  for(let lat=-80;lat<=80;lat+=20){const y=toY(lat);ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
+  for(let lng=-180;lng<=180;lng+=30){const x=toX(lng);ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}
+  ctx.strokeStyle='#d4782a'; ctx.lineWidth=3; ctx.lineJoin='round';
+  ctx.beginPath();
+  pts.forEach((p,i)=>{if(i===0)ctx.moveTo(toX(p.lng),toY(p.lat));else ctx.lineTo(toX(p.lng),toY(p.lat));});
+  ctx.stroke();
+  [[ap1,dep],[ap2,arr]].forEach(([ap,code])=>{
+    ctx.fillStyle='#d4782a'; ctx.beginPath(); ctx.arc(toX(ap.lng),toY(ap.lat),7,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle='#fff'; ctx.beginPath(); ctx.arc(toX(ap.lng),toY(ap.lat),3,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle='#1a1917'; ctx.font=`bold 24px 'DM Mono', monospace`;
+    ctx.fillText(code,toX(ap.lng)+12,toY(ap.lat)+6);
+  });
+}
+
+document.getElementById('flightDate').value=new Date().toISOString().split('T')[0];
+</script>
+</body>
+</html>
