@@ -693,7 +693,8 @@ function runCalculation(dep, arr, depUTC, dur, flightLabel) {
     :`Right side of the plane (facing forward). Sun on your side for ${kPct}% of the flight.`;
 
   const tag=document.getElementById('flightTagDisplay');
-  tag.textContent=`${flightLabel} · ${dep} → ${arr} · ${Math.round(dur*10)/10}h`;
+  const depTimeLabel = FLIGHTS[flightLabel] ? ` · ${FLIGHTS[flightLabel].depTime} local` : '';
+  tag.textContent=`${flightLabel} · ${dep} → ${arr}${depTimeLabel} · ${Math.round(dur*10)/10}h`;
   tag.style.display='inline-block';
 
   document.getElementById('aPct').textContent=aPct+'%';
