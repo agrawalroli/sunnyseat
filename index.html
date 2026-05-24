@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Azimuth — Window Seat Optimizer</title>
+<title>Sunny Side — Window Seat Optimizer</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -79,7 +79,7 @@
 <body>
 <header>
   <div class="sun-icon"></div>
-  <h1>azimuth</h1>
+  <h1>Sunny Side</h1>
   <span>/ window seat optimizer</span>
 </header>
 <main>
@@ -190,7 +190,7 @@ const FLIGHTS = {
   // Verify at flightradar24.com or flightaware.com before adding.
   // ============================================================
 
-  // Lufthansa — LHR routes verified
+  // Lufthansa (LH)
   'LH400': { dep: 'FRA', arr: 'JFK', depTime: '10:55', dur: 9.5 },
   'LH401': { dep: 'JFK', arr: 'FRA', depTime: '18:00', dur: 7.5 },
   'LH404': { dep: 'FRA', arr: 'JFK', depTime: '15:30', dur: 9.5 },
@@ -211,102 +211,103 @@ const FLIGHTS = {
   'LH694': { dep: 'FRA', arr: 'JNB', depTime: '20:30', dur: 10.5 },
   'LH548': { dep: 'FRA', arr: 'GRU', depTime: '22:55', dur: 11.5 },
 
-  // British Airways — please verify times at flightradar24.com
-  'BA112': { dep: 'LHR', arr: 'JFK', depTime: '09:25', dur: 7.5 },
-  'BA114': { dep: 'LHR', arr: 'JFK', depTime: '12:15', dur: 7.5 },
-  'BA116': { dep: 'LHR', arr: 'JFK', depTime: '18:00', dur: 7.5 },
-  'BA175': { dep: 'LHR', arr: 'JFK', depTime: '11:00', dur: 7.5 },
-  'BA177': { dep: 'LHR', arr: 'JFK', depTime: '15:30', dur: 7.5 },
-  'BA101': { dep: 'LHR', arr: 'JFK', depTime: '10:10', dur: 7.5 },
-  'BA103': { dep: 'LHR', arr: 'JFK', depTime: '14:00', dur: 7.5 },
-  'BA286': { dep: 'LHR', arr: 'JFK', depTime: '11:25', dur: 7.5 },
-  'BA269': { dep: 'LHR', arr: 'LAX', depTime: '12:35', dur: 10.5 },
-  'BA283': { dep: 'LHR', arr: 'SFO', depTime: '11:30', dur: 10.5 },
-  'BA213': { dep: 'LHR', arr: 'ORD', depTime: '12:00', dur: 8.5 },
-  'BA295': { dep: 'LHR', arr: 'MIA', depTime: '11:05', dur: 9.5 },
-  'BA217': { dep: 'LHR', arr: 'BOS', depTime: '11:20', dur: 7.0 },
-  'BA237': { dep: 'LHR', arr: 'ATL', depTime: '11:15', dur: 9.0 },
-  'BA231': { dep: 'LHR', arr: 'IAD', depTime: '11:30', dur: 8.5 },
-  'BA227': { dep: 'LHR', arr: 'DFW', depTime: '11:25', dur: 10.5 },
-  'BA253': { dep: 'LHR', arr: 'YYZ', depTime: '10:30', dur: 8.0 },
-  'BA9':   { dep: 'LHR', arr: 'SIN', depTime: '21:30', dur: 13.0 },
-  'BA11':  { dep: 'LHR', arr: 'SIN', depTime: '23:00', dur: 13.0 },
-  'BA31':  { dep: 'LHR', arr: 'HKG', depTime: '22:00', dur: 11.5 },
-  'BA5':   { dep: 'LHR', arr: 'NRT', depTime: '13:00', dur: 11.5 },
-  'BA7':   { dep: 'LHR', arr: 'NRT', depTime: '19:30', dur: 11.5 },
-  'BA117': { dep: 'LHR', arr: 'DEL', depTime: '21:40', dur: 8.5 },
-  'BA119': { dep: 'LHR', arr: 'DEL', depTime: '09:20', dur: 8.5 },
-  'BA139': { dep: 'LHR', arr: 'BOM', depTime: '21:30', dur: 9.0 },
-  'BA107': { dep: 'LHR', arr: 'BLR', depTime: '21:25', dur: 9.5 },
-  'BA105': { dep: 'LHR', arr: 'DXB', depTime: '14:30', dur: 7.0 },
-  'BA43':  { dep: 'LHR', arr: 'JNB', depTime: '18:20', dur: 11.0 },
-  'BA55':  { dep: 'LHR', arr: 'NBO', depTime: '20:00', dur: 8.5 },
-  'BA245': { dep: 'LHR', arr: 'GRU', depTime: '21:30', dur: 11.5 },
-  'BA303': { dep: 'LHR', arr: 'YYZ', depTime: '10:30', dur: 8.0 },
-  'BA93':  { dep: 'LHR', arr: 'SYD', depTime: '17:00', dur: 21.5 },
-  'BA49':  { dep: 'LHR', arr: 'BKK', depTime: '21:45', dur: 11.5 },
-  'BA029': { dep: 'LHR', arr: 'PEK', depTime: '21:00', dur: 10.5 },
-  'BA027': { dep: 'LHR', arr: 'PVG', depTime: '21:30', dur: 11.5 },
-  'BA089': { dep: 'LHR', arr: 'CPT', depTime: '18:00', dur: 11.5 },
-  'BA091': { dep: 'LHR', arr: 'JNB', depTime: '21:20', dur: 11.0 },
-  // BA1314 Aberdeen — verify exact times at flightradar24.com
+  // British Airways (BA)
+  'BA5':    { dep: 'LHR', arr: 'NRT', depTime: '13:00', dur: 11.5 },
+  'BA7':    { dep: 'LHR', arr: 'NRT', depTime: '19:30', dur: 11.5 },
+  'BA9':    { dep: 'LHR', arr: 'SIN', depTime: '21:30', dur: 13.0 },
+  'BA11':   { dep: 'LHR', arr: 'SIN', depTime: '23:00', dur: 13.0 },
+  'BA31':   { dep: 'LHR', arr: 'HKG', depTime: '22:00', dur: 11.5 },
+  'BA43':   { dep: 'LHR', arr: 'JNB', depTime: '18:20', dur: 11.0 },
+  'BA55':   { dep: 'LHR', arr: 'NBO', depTime: '20:00', dur: 8.5 },
+  'BA93':   { dep: 'LHR', arr: 'SYD', depTime: '17:00', dur: 21.5 },
+  'BA101':  { dep: 'LHR', arr: 'JFK', depTime: '10:10', dur: 7.5 },
+  'BA103':  { dep: 'LHR', arr: 'JFK', depTime: '14:00', dur: 7.5 },
+  'BA105':  { dep: 'LHR', arr: 'DXB', depTime: '14:30', dur: 7.0 },
+  'BA107':  { dep: 'LHR', arr: 'BLR', depTime: '21:25', dur: 9.5 },
+  'BA112':  { dep: 'LHR', arr: 'JFK', depTime: '09:25', dur: 7.5 },
+  'BA114':  { dep: 'LHR', arr: 'JFK', depTime: '12:15', dur: 7.5 },
+  'BA116':  { dep: 'LHR', arr: 'JFK', depTime: '18:00', dur: 7.5 },
+  'BA117':  { dep: 'LHR', arr: 'DEL', depTime: '21:40', dur: 8.5 },
+  'BA119':  { dep: 'LHR', arr: 'DEL', depTime: '09:20', dur: 8.5 },
+  'BA139':  { dep: 'LHR', arr: 'BOM', depTime: '21:30', dur: 9.0 },
+  'BA175':  { dep: 'LHR', arr: 'JFK', depTime: '11:00', dur: 7.5 },
+  'BA177':  { dep: 'LHR', arr: 'JFK', depTime: '15:30', dur: 7.5 },
+  'BA213':  { dep: 'LHR', arr: 'ORD', depTime: '12:00', dur: 8.5 },
+  'BA217':  { dep: 'LHR', arr: 'BOS', depTime: '11:20', dur: 7.0 },
+  'BA227':  { dep: 'LHR', arr: 'DFW', depTime: '11:25', dur: 10.5 },
+  'BA231':  { dep: 'LHR', arr: 'IAD', depTime: '11:30', dur: 8.5 },
+  'BA237':  { dep: 'LHR', arr: 'ATL', depTime: '11:15', dur: 9.0 },
+  'BA245':  { dep: 'LHR', arr: 'EZE', depTime: '22:20', dur: 13.5 },
+  'BA253':  { dep: 'LHR', arr: 'YYZ', depTime: '10:30', dur: 8.0 },
+  'BA269':  { dep: 'LHR', arr: 'LAX', depTime: '12:35', dur: 10.5 },
+  'BA283':  { dep: 'LHR', arr: 'SFO', depTime: '11:30', dur: 10.5 },
+  'BA284':  { dep: 'SFO', arr: 'LHR', depTime: '16:35', dur: 10.5 },
+  'BA285':  { dep: 'LHR', arr: 'SFO', depTime: '10:45', dur: 11.0 },
+  'BA286':  { dep: 'SFO', arr: 'LHR', depTime: '19:30', dur: 10.5 },
+  'BA287':  { dep: 'LHR', arr: 'SFO', depTime: '14:30', dur: 11.0 },
+  'BA295':  { dep: 'LHR', arr: 'MIA', depTime: '11:05', dur: 9.5 },
+  'BA303':  { dep: 'LHR', arr: 'YYZ', depTime: '10:30', dur: 8.0 },
   'BA1314': { dep: 'LHR', arr: 'ABZ', depTime: '07:00', dur: 1.5 },
   'BA1315': { dep: 'ABZ', arr: 'LHR', depTime: '09:00', dur: 1.5 },
   'BA1316': { dep: 'LHR', arr: 'ABZ', depTime: '10:30', dur: 1.5 },
   'BA1317': { dep: 'ABZ', arr: 'LHR', depTime: '12:30', dur: 1.5 },
+  'BA027':  { dep: 'LHR', arr: 'PVG', depTime: '21:30', dur: 11.5 },
+  'BA029':  { dep: 'LHR', arr: 'PEK', depTime: '21:00', dur: 10.5 },
+  'BA089':  { dep: 'LHR', arr: 'CPT', depTime: '18:00', dur: 11.5 },
+  'BA091':  { dep: 'LHR', arr: 'JNB', depTime: '21:20', dur: 11.0 },
 
-  // Emirates
+  // Emirates (EK)
   'EK001': { dep: 'DXB', arr: 'LHR', depTime: '08:35', dur: 7.5 },
-  'EK003': { dep: 'DXB', arr: 'LHR', depTime: '14:30', dur: 7.5 },
   'EK002': { dep: 'LHR', arr: 'DXB', depTime: '14:30', dur: 7.0 },
+  'EK003': { dep: 'DXB', arr: 'LHR', depTime: '14:30', dur: 7.5 },
   'EK004': { dep: 'LHR', arr: 'DXB', depTime: '21:30', dur: 7.0 },
+  'EK035': { dep: 'DXB', arr: 'FRA', depTime: '08:00', dur: 7.0 },
+  'EK045': { dep: 'DXB', arr: 'CDG', depTime: '08:15', dur: 7.0 },
   'EK201': { dep: 'DXB', arr: 'JFK', depTime: '08:20', dur: 13.5 },
   'EK203': { dep: 'DXB', arr: 'JFK', depTime: '23:30', dur: 13.5 },
   'EK215': { dep: 'DXB', arr: 'LAX', depTime: '08:45', dur: 16.5 },
   'EK225': { dep: 'DXB', arr: 'SFO', depTime: '09:55', dur: 16.5 },
+  'EK317': { dep: 'DXB', arr: 'JNB', depTime: '08:25', dur: 8.5 },
   'EK405': { dep: 'DXB', arr: 'SIN', depTime: '10:30', dur: 7.0 },
   'EK407': { dep: 'DXB', arr: 'SIN', depTime: '23:59', dur: 7.0 },
   'EK501': { dep: 'DXB', arr: 'BOM', depTime: '07:40', dur: 3.0 },
   'EK505': { dep: 'DXB', arr: 'DEL', depTime: '10:05', dur: 3.5 },
   'EK521': { dep: 'DXB', arr: 'BLR', depTime: '09:45', dur: 4.0 },
   'EK524': { dep: 'BLR', arr: 'DXB', depTime: '03:00', dur: 4.0 },
-  'EK771': { dep: 'DXB', arr: 'NRT', depTime: '09:55', dur: 9.5 },
-  'EK317': { dep: 'DXB', arr: 'JNB', depTime: '08:25', dur: 8.5 },
   'EK761': { dep: 'DXB', arr: 'SYD', depTime: '22:20', dur: 14.0 },
-  'EK035': { dep: 'DXB', arr: 'FRA', depTime: '08:00', dur: 7.0 },
-  'EK045': { dep: 'DXB', arr: 'CDG', depTime: '08:15', dur: 7.0 },
+  'EK771': { dep: 'CPT', arr: 'DXB', depTime: '18:25', dur: 9.5 },
 
-  // Qatar Airways
+  // Qatar Airways (QR)
   'QR001': { dep: 'DOH', arr: 'LHR', depTime: '07:55', dur: 7.0 },
-  'QR003': { dep: 'DOH', arr: 'LHR', depTime: '13:50', dur: 7.0 },
   'QR002': { dep: 'LHR', arr: 'DOH', depTime: '21:30', dur: 6.5 },
+  'QR003': { dep: 'DOH', arr: 'LHR', depTime: '13:50', dur: 7.0 },
   'QR017': { dep: 'DOH', arr: 'JFK', depTime: '06:55', dur: 13.5 },
   'QR019': { dep: 'DOH', arr: 'JFK', depTime: '22:45', dur: 13.5 },
-  'QR735': { dep: 'DOH', arr: 'BLR', depTime: '09:15', dur: 4.5 },
+  'QR037': { dep: 'DOH', arr: 'LAX', depTime: '08:20', dur: 16.5 },
+  'QR161': { dep: 'DOH', arr: 'FRA', depTime: '08:00', dur: 6.5 },
   'QR500': { dep: 'DOH', arr: 'DEL', depTime: '10:30', dur: 4.0 },
   'QR556': { dep: 'DOH', arr: 'BOM', depTime: '11:20', dur: 3.5 },
-  'QR833': { dep: 'DOH', arr: 'SIN', depTime: '01:55', dur: 7.0 },
-  'QR817': { dep: 'DOH', arr: 'SYD', depTime: '02:15', dur: 14.0 },
-  'QR161': { dep: 'DOH', arr: 'FRA', depTime: '08:00', dur: 6.5 },
-  'QR037': { dep: 'DOH', arr: 'LAX', depTime: '08:20', dur: 16.5 },
+  'QR735': { dep: 'DOH', arr: 'BLR', depTime: '09:15', dur: 4.5 },
   'QR777': { dep: 'DOH', arr: 'NRT', depTime: '08:45', dur: 10.0 },
+  'QR817': { dep: 'DOH', arr: 'SYD', depTime: '02:15', dur: 14.0 },
+  'QR833': { dep: 'DOH', arr: 'SIN', depTime: '01:55', dur: 7.0 },
 
-  // Singapore Airlines
-  'SQ321': { dep: 'SIN', arr: 'LHR', depTime: '23:55', dur: 13.0 },
-  'SQ317': { dep: 'SIN', arr: 'LHR', depTime: '01:30', dur: 13.0 },
-  'SQ322': { dep: 'LHR', arr: 'SIN', depTime: '21:30', dur: 13.0 },
-  'SQ25':  { dep: 'SIN', arr: 'JFK', depTime: '23:55', dur: 18.5 },
-  'SQ26':  { dep: 'JFK', arr: 'SIN', depTime: '10:30', dur: 18.5 },
-  'SQ37':  { dep: 'SIN', arr: 'LAX', depTime: '00:05', dur: 17.5 },
+  // Singapore Airlines (SQ)
   'SQ007': { dep: 'SIN', arr: 'SFO', depTime: '00:25', dur: 17.0 },
-  'SQ469': { dep: 'SIN', arr: 'DEL', depTime: '09:00', dur: 5.5 },
-  'SQ423': { dep: 'SIN', arr: 'BOM', depTime: '09:30', dur: 5.5 },
-  'SQ421': { dep: 'SIN', arr: 'BLR', depTime: '11:45', dur: 4.5 },
-  'SQ833': { dep: 'SIN', arr: 'SYD', depTime: '07:55', dur: 7.5 },
+  'SQ25':  { dep: 'JFK', arr: 'SIN', depTime: '22:15', dur: 18.5 },
+  'SQ26':  { dep: 'SIN', arr: 'JFK', depTime: '23:55', dur: 18.5 },
+  'SQ37':  { dep: 'SIN', arr: 'LAX', depTime: '00:05', dur: 17.5 },
   'SQ231': { dep: 'SIN', arr: 'NRT', depTime: '10:50', dur: 7.0 },
+  'SQ317': { dep: 'SIN', arr: 'LHR', depTime: '01:30', dur: 13.0 },
+  'SQ321': { dep: 'SIN', arr: 'LHR', depTime: '23:55', dur: 13.0 },
+  'SQ322': { dep: 'LHR', arr: 'SIN', depTime: '21:30', dur: 13.0 },
+  'SQ421': { dep: 'SIN', arr: 'BLR', depTime: '11:45', dur: 4.5 },
+  'SQ423': { dep: 'SIN', arr: 'BOM', depTime: '09:30', dur: 5.5 },
+  'SQ469': { dep: 'SIN', arr: 'DEL', depTime: '09:00', dur: 5.5 },
   'SQ801': { dep: 'SIN', arr: 'HKG', depTime: '07:55', dur: 3.5 },
+  'SQ833': { dep: 'SIN', arr: 'SYD', depTime: '07:55', dur: 7.5 },
 
-  // Air India
+  // Air India (AI)
   'AI101': { dep: 'DEL', arr: 'JFK', depTime: '14:10', dur: 15.5 },
   'AI102': { dep: 'JFK', arr: 'DEL', depTime: '22:00', dur: 14.0 },
   'AI131': { dep: 'DEL', arr: 'LHR', depTime: '14:10', dur: 9.0 },
@@ -316,80 +317,78 @@ const FLIGHTS = {
   'AI175': { dep: 'BLR', arr: 'SFO', depTime: '22:30', dur: 17.0 },
   'AI176': { dep: 'SFO', arr: 'BLR', depTime: '10:30', dur: 17.5 },
 
-  // Etihad
+  // Etihad (EY)
   'EY001': { dep: 'AUH', arr: 'LHR', depTime: '08:15', dur: 7.5 },
   'EY002': { dep: 'LHR', arr: 'AUH', depTime: '21:10', dur: 7.0 },
   'EY101': { dep: 'AUH', arr: 'JFK', depTime: '09:00', dur: 13.0 },
   'EY201': { dep: 'AUH', arr: 'SYD', depTime: '22:05', dur: 14.5 },
   'EY281': { dep: 'AUH', arr: 'BLR', depTime: '11:50', dur: 4.0 },
 
-  // Air France
+  // Air France (AF)
   'AF006': { dep: 'CDG', arr: 'LAX', depTime: '10:55', dur: 11.5 },
   'AF066': { dep: 'CDG', arr: 'JFK', depTime: '10:15', dur: 8.0 },
   'AF068': { dep: 'CDG', arr: 'JFK', depTime: '13:30', dur: 8.0 },
   'AF160': { dep: 'CDG', arr: 'NRT', depTime: '12:55', dur: 12.5 },
-  'AF264': { dep: 'CDG', arr: 'DEL', depTime: '22:30', dur: 8.5 },
   'AF192': { dep: 'CDG', arr: 'SIN', depTime: '23:30', dur: 12.5 },
+  'AF264': { dep: 'CDG', arr: 'DEL', depTime: '22:30', dur: 8.5 },
 
-  // KLM
-  'KL641': { dep: 'AMS', arr: 'JFK', depTime: '09:50', dur: 8.5 },
+  // KLM (KL)
   'KL601': { dep: 'AMS', arr: 'SFO', depTime: '12:30', dur: 11.5 },
+  'KL641': { dep: 'AMS', arr: 'JFK', depTime: '09:50', dur: 8.5 },
+  'KL837': { dep: 'AMS', arr: 'DEL', depTime: '22:35', dur: 8.5 },
   'KL867': { dep: 'AMS', arr: 'NRT', depTime: '13:30', dur: 11.5 },
   'KL877': { dep: 'AMS', arr: 'SIN', depTime: '22:30', dur: 12.5 },
-  'KL837': { dep: 'AMS', arr: 'DEL', depTime: '22:35', dur: 8.5 },
 
-  // Turkish Airlines
+  // Turkish Airlines (TK)
   'TK1':   { dep: 'IST', arr: 'JFK', depTime: '12:00', dur: 10.5 },
   'TK3':   { dep: 'IST', arr: 'LAX', depTime: '12:30', dur: 13.0 },
   'TK11':  { dep: 'IST', arr: 'LHR', depTime: '06:15', dur: 4.0 },
   'TK71':  { dep: 'IST', arr: 'SIN', depTime: '00:15', dur: 10.5 },
 
-  // Swiss
+  // Swiss (LX)
   'LX014': { dep: 'ZRH', arr: 'JFK', depTime: '10:30', dur: 9.5 },
   'LX022': { dep: 'ZRH', arr: 'LAX', depTime: '12:30', dur: 12.0 },
   'LX188': { dep: 'ZRH', arr: 'SIN', depTime: '22:15', dur: 12.5 },
 
-  // Virgin Atlantic
+  // Virgin Atlantic (VS)
   'VS3':   { dep: 'LHR', arr: 'JFK', depTime: '11:30', dur: 7.5 },
   'VS25':  { dep: 'LHR', arr: 'JFK', depTime: '15:30', dur: 7.5 },
   'VS43':  { dep: 'LHR', arr: 'LAX', depTime: '13:00', dur: 10.5 },
   'VS45':  { dep: 'LHR', arr: 'SFO', depTime: '11:30', dur: 10.5 },
-  'VS401': { dep: 'LHR', arr: 'HKG', depTime: '22:20', dur: 11.5 },
+  'VS401': { dep: 'DXB', arr: 'LHR', depTime: '11:20', dur: 8.0 },
 
-  // Cathay Pacific
-  'CX251': { dep: 'HKG', arr: 'LHR', depTime: '23:55', dur: 13.0 },
+  // Cathay Pacific (CX)
   'CX231': { dep: 'HKG', arr: 'JFK', depTime: '01:15', dur: 16.0 },
-  'CX881': { dep: 'HKG', arr: 'LAX', depTime: '00:15', dur: 13.5 },
-  'CX715': { dep: 'HKG', arr: 'SYD', depTime: '09:35', dur: 9.0 },
+  'CX251': { dep: 'HKG', arr: 'LHR', depTime: '23:55', dur: 13.0 },
   'CX471': { dep: 'HKG', arr: 'DEL', depTime: '10:30', dur: 5.5 },
+  'CX715': { dep: 'HKG', arr: 'SYD', depTime: '09:35', dur: 9.0 },
+  'CX881': { dep: 'HKG', arr: 'LAX', depTime: '00:15', dur: 13.5 },
 
-  // Qantas
+  // Qantas (QF)
   'QF7':   { dep: 'SYD', arr: 'LAX', depTime: '12:20', dur: 13.5 },
   'QF11':  { dep: 'SYD', arr: 'JFK', depTime: '17:00', dur: 20.0 },
   'QF107': { dep: 'SYD', arr: 'SIN', depTime: '12:00', dur: 8.0 },
 
-  // Japan Airlines — verified from FlightAware & Trip.com (2025)
-  // HND routes
-  'JL6':   { dep: 'HND', arr: 'JFK', depTime: '11:05', dur: 12.5 },
+  // Japan Airlines (JL)
+  'JL1':   { dep: 'SFO', arr: 'HND', depTime: '11:55', dur: 11.0 },
+  'JL2':   { dep: 'HND', arr: 'SFO', depTime: '16:20', dur: 9.5 },
+  'JL3':   { dep: 'JFK', arr: 'HND', depTime: '01:40', dur: 14.0 },
   'JL4':   { dep: 'HND', arr: 'JFK', depTime: '18:30', dur: 12.5 },
   'JL5':   { dep: 'JFK', arr: 'HND', depTime: '13:45', dur: 14.0 },
-  'JL3':   { dep: 'JFK', arr: 'HND', depTime: '01:40', dur: 14.0 },
-  'JL2':   { dep: 'HND', arr: 'SFO', depTime: '16:20', dur: 9.5 },
-  'JL1':   { dep: 'SFO', arr: 'HND', depTime: '11:00', dur: 11.0 },
-  'JL58':  { dep: 'NRT', arr: 'SFO', depTime: '17:40', dur: 10.0 },
-  'JL57':  { dep: 'SFO', arr: 'NRT', depTime: '12:00', dur: 11.0 },
+  'JL6':   { dep: 'HND', arr: 'JFK', depTime: '11:05', dur: 12.5 },
+  'JL11':  { dep: 'HND', arr: 'DFW', depTime: '11:25', dur: 11.5 },
+  'JL12':  { dep: 'DFW', arr: 'HND', depTime: '12:20', dur: 13.0 },
+  'JL31':  { dep: 'HND', arr: 'HKG', depTime: '09:45', dur: 4.5 },
+  'JL33':  { dep: 'HND', arr: 'BKK', depTime: '00:10', dur: 6.5 },
+  'JL35':  { dep: 'HND', arr: 'SIN', depTime: '00:05', dur: 7.5 },
+  'JL36':  { dep: 'SIN', arr: 'HND', depTime: '08:30', dur: 7.5 },
+  'JL37':  { dep: 'HND', arr: 'SIN', depTime: '10:55', dur: 7.5 },
   'JL43':  { dep: 'HND', arr: 'LHR', depTime: '09:50', dur: 13.5 },
   'JL44':  { dep: 'LHR', arr: 'HND', depTime: '18:30', dur: 13.5 },
   'JL45':  { dep: 'HND', arr: 'CDG', depTime: '10:20', dur: 14.0 },
   'JL46':  { dep: 'CDG', arr: 'HND', depTime: '20:25', dur: 12.5 },
-  'JL35':  { dep: 'HND', arr: 'SIN', depTime: '00:05', dur: 7.5 },
-  'JL37':  { dep: 'HND', arr: 'SIN', depTime: '10:55', dur: 7.5 },
-  'JL36':  { dep: 'SIN', arr: 'HND', depTime: '08:30', dur: 7.5 },
-  'JL33':  { dep: 'HND', arr: 'BKK', depTime: '00:10', dur: 6.5 },
-  'JL31':  { dep: 'HND', arr: 'HKG', depTime: '09:45', dur: 4.5 },
-  // DFW added from verified source
-  'JL11':  { dep: 'HND', arr: 'DFW', depTime: '11:25', dur: 11.5 },
-  'JL12':  { dep: 'DFW', arr: 'HND', depTime: '12:20', dur: 13.0 },
+  'JL57':  { dep: 'SFO', arr: 'NRT', depTime: '12:00', dur: 11.0 },
+  'JL58':  { dep: 'NRT', arr: 'SFO', depTime: '17:40', dur: 10.0 }
 
 };
 
