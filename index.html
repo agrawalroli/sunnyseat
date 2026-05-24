@@ -215,7 +215,7 @@ async function findSunnySide() {
     const flightNumber = flightNum.slice(airlineIata.length);
 
     // Try real-time/recent flights endpoint first
-    const url = `https://api.aviationstack.com/v1/flights?access_key=${apiKey}&flight_iata=${flightNum}&flight_date=${flightDate}&limit=1`;
+    const url = `https://ancient-water-ef87.roliagrawal.workers.dev?endpoint=flights&params=flight_iata=${flightNum}%26flight_date=${flightDate}%26limit=1`;
     const res = await fetch(url);
     const data = await res.json();
 
@@ -244,7 +244,7 @@ async function findSunnySide() {
 
     // Fallback: try routes endpoint (gives scheduled times without date)
     if (!dep || !arr || !depUTC || !dur) {
-      const routeUrl = `https://api.aviationstack.com/v1/routes?access_key=${apiKey}&flight_iata=${flightNum}&limit=1`;
+      const routeUrl = `https://ancient-water-ef87.roliagrawal.workers.dev?endpoint=routes&params=flight_iata=${flightNum}%26limit=1`;
       const routeRes = await fetch(routeUrl);
       const routeData = await routeRes.json();
 
