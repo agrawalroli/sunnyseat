@@ -725,17 +725,34 @@ function runCalculation(dep, arr, depUTC, dur, flightLabel) {
     else{aSun++;segments.push({side:'A'});}
   }
 
-  const winner=aSun>=kSun?'A':'K';
-  const dist=haversine(ap1.lat,ap1.lng,ap2.lat,ap2.lng);
-  const aPct=Math.round(aSun/STEPS*100);
-  const kPct=Math.round(kSun/STEPS*100);
+  let winner = 'A';
+let resultTitle = '';
+let resultDesc = '';
 
-  document.getElementById('sideLetterBig').textContent=winner;
-  document.getElementById('resultTitle').textContent=`Sit on the ${winner} side`;
-  document.getElementById('resultDesc').textContent=
-    winner==='A'
-    ?`Left side of the plane (facing forward). Sun on your side for ${aPct}% of the flight.`
-    :`Right side of the plane (facing forward). Sun on your side for ${kPct}% of the flight.`;
+const aPct=Math.round(aSun/STEPS*100);
+const kPct=Math.round(kSun/STEPS*100);
+
+if (aSun === 0 && kSun === 0) {
+  winner = '—';
+  resultTitle = "Night Flight";
+  resultDesc = "Enjoy the views or get some sleep—it's dark on both sides of the aircraft!";
+} else if (aSun === kSun) {
+  winner = '½';
+  resultTitle = "Equally Sunny";
+  resultDesc = `The sun shifts across the journey. Left (A) has sun for ${aPct}%, Right (K) has sun for ${kPct}%. Either side is fine!`;
+} else {
+  winner = aSun > kSun ? 'A' : 'K';
+  resultTitle = `Sit on the ${winner} side`;
+  resultDesc = winner === 'A'
+    ? `Left side of the plane (facing forward). The sun will be on your side for ${aPct}% of the flight.`
+    : `Right side of the plane (facing forward). The sun will be on your side for ${kPct}% of the flight.`;
+}
+
+const dist=haversine(ap1.lat,ap1.lng,ap2.lat,ap2.lng);
+
+document.getElementById('sideLetterBig').textContent=winner;
+document.getElementById('resultTitle').textContent=resultTitle;
+document.getElementById('resultDesc').textContent=resultDesc;
 
   const tag=document.getElementById('flightTagDisplay');
   const depTimeLabel = FLIGHTS[flightLabel] ? ` · ${FLIGHTS[flightLabel].depTime} local` : '';
