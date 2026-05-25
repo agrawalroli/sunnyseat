@@ -546,7 +546,8 @@ function handleCalc() {
 }
 
 function findSunnySide() {
-  const flightNum = document.getElementById('flightNum').value.toUpperCase().trim().replace(/\s/g,'');
+  const rawInput = document.getElementById('flightNum').value.toUpperCase().trim().replace(/\s/g,'');
+  const flightNum = rawInput.replace(/^([A-Z]{1,3})0+(\d)/, '$1$2');
   const flightDate = document.getElementById('flightDate').value;
   const errEl = document.getElementById('error');
   errEl.textContent = '';
