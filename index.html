@@ -125,6 +125,21 @@
       </div>
     </div>
 
+   <div id="coordFields" style="display:none; flex-direction:column; gap:1.1rem;">
+  <div style="font-family:var(--mono); font-size:11px; color:var(--accent);" id="coordLabel"></div>
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+    <div class="field">
+      <label>Latitude</label>
+      <input type="text" id="coordLat" placeholder="51.477">
+    </div>
+    <div class="field">
+      <label>Longitude</label>
+      <input type="text" id="coordLng" placeholder="-0.461">
+    </div>
+  </div>
+  <div style="font-family:var(--mono); font-size:10px; color:var(--muted);">Find on <a href="https://www.latlong.net" target="_blank" style="color:var(--accent);">latlong.net</a> or Google Maps (right-click → copy coords)</div>
+</div>
+   
     <div class="error" id="error"></div>
     <button class="calc-btn" id="calcBtn" onclick="handleCalc()">
       <div class="sun-btn"></div>
@@ -526,7 +541,18 @@ const AIRPORTS = {
   BOG:{lat:4.702,lng:-74.146,tz:-5},
 };
 
-let currentMode = 'flight';
+let pendingCoordFor = null;
+
+function showCoordFields(which, code) {
+  pendingCoordFor = which;
+  document.getElementById('coordFields').style.display = 'flex';
+  document.getElementById('coordLabel').textContent =
+    `${code} not in database — enter its coordinates:`;
+  document.getElementById('coordLat').value = '';
+  document.getElementById('coordLng').value = '';
+}
+ 
+ let currentMode = 'flight';
 
 function setMode(mode) {
   currentMode = mode;
@@ -594,13 +620,31 @@ function manualCalc() {
   const errEl = document.getElementById('error');
   errEl.textContent = '';
 
+ // Inject custom coords if user provided them
+  if (pendingCoordFor === 'dep' && document.getElementById('coordLat').value) {
+    const lat = parseFloat(document.getElementById('coordLat').value);
+    const lng = parseFloat(document.getElementById('coordLng').value);
+    AIRPORTS[dep] = { lat, lng, tz: 0 };
+    pendingCoordFor = null;
+    document.getElementById('coordFields').style.display = 'none';
+  }
+  if (pendingCoordFor === 'arr' && document.getElementById('coordLat').value) {
+    const lat = parseFloat(document.getElementById('coordLat').value);
+    const lng = parseFloat(document.getElementById('coordLng').value);
+    AIRPORTS[arr] = { lat, lng, tz: 0 };
+    pendingCoordFor = null;
+    document.getElementById('coordFields').style.display = 'none';
+  }
+ 
   if (!dep || !arr) { errEl.textContent = 'Enter departure and arrival airports.'; return; }
   if (!date) { errEl.textContent = 'Enter a date.'; return; }
   if (!time || !time.includes(':')) { errEl.textContent = 'Enter departure time as HH:MM.'; return; }
   if (isNaN(dur) || dur < 0.5) { errEl.textContent = 'Enter a valid duration (e.g. 9.5).'; return; }
-  if (!AIRPORTS[dep]) { errEl.textContent = `Unknown airport: ${dep}`; return; }
-  if (!AIRPORTS[arr]) { errEl.textContent = `Unknown airport: ${arr}`; return; }
-
+  //if (!AIRPORTS[dep]) { errEl.textContent = `Unknown airport: ${dep}`; return; }
+  //if (!AIRPORTS[arr]) { errEl.textContent = `Unknown airport: ${arr}`; return; }
+  if (!AIRPORTS[dep]) { showCoordFields('dep', dep); return; }
+  if (!AIRPORTS[arr]) { showCoordFields('arr', arr); return; }
+ 
   const ap1 = AIRPORTS[dep];
   const [hr, mn] = time.split(':').map(Number);
   const [yr, mo, dy] = date.split('-').map(Number);
